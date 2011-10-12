@@ -1506,6 +1506,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             target->RemoveGameObject(GetId(), true);
                         target->RemoveAura(62388);
                     break;
+                   case 6358: // Seduction
+                        // Interrupt cast if aura removed from target
+                        // maybe should be used SpellChannelInterruptFlags instead
+                        caster->InterruptNonMeleeSpells(false, 6358, false);
+                    break;
                 }
                 break;
             case SPELLFAMILY_PRIEST:
