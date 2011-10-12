@@ -65,7 +65,7 @@ void BattlegroundRV::PostUpdateImpl(uint32 diff)
                     DoorOpen(i);
                 setTimer(BG_RV_PILAR_TO_FIRE_TIMER);
                 setState(BG_RV_STATE_OPEN_FIRE);
-				SwitchDynLos();
+                SwitchDynLos();
                 break;
             case BG_RV_STATE_OPEN_FIRE:
                 // FIXME: after 3.2.0 it's only decorative and should be opened only one time at battle start
@@ -79,7 +79,7 @@ void BattlegroundRV::PostUpdateImpl(uint32 diff)
                     DoorOpen(i);
                 setTimer(BG_RV_PILAR_TO_FIRE_TIMER);
                 setState(BG_RV_STATE_CLOSE_FIRE);
-				SwitchDynLos();
+                SwitchDynLos();
                 break;
         }
     }

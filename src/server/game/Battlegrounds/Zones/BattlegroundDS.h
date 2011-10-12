@@ -79,13 +79,11 @@ class BattlegroundDS : public Battleground
         void HandleKillPlayer(Player* player, Player* killer);
         bool HandlePlayerUnderMap(Player* plr);
     private:
-        bool m_knockbackCheck;
-        uint32 m_knockback;
-        void KnockBackPlayer(Unit *pPlayer, float angle, float horizontalSpeed, float verticalSpeed);
         virtual void PostUpdateImpl(uint32 diff);
         uint8 m_waterFallStatus;
         uint32 m_waterFall;
         uint32 m_teleport;
+        uint32 m_knockback;
         uint32 m_dynamicLOSid;
 };
 #endif

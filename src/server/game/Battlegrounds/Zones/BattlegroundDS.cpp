@@ -243,20 +243,3 @@ bool BattlegroundDS::SetupBattleground()
 
     return true;
 }
-
-void BattlegroundDS::KnockBackPlayer(Unit *pPlayer, float angle, float horizontalSpeed, float verticalSpeed)
-{
-    if(pPlayer->GetTypeId() == TYPEID_PLAYER)
-    {
-        WorldPacket data(SMSG_MOVE_KNOCK_BACK, 8+4+4+4+4+2);
-        data.append(pPlayer->GetPackGUID());
-        data << uint32(0);
-        data << float(cos(angle));
-        data << float(sin(angle));
-        data << float(horizontalSpeed);
-        data << float(-verticalSpeed);
-        ((Player*)pPlayer)->GetSession()->SendPacket(&data);
-    }
-    else
-        sLog->outError("The target of KnockBackPlayer must be a player !");
-}
