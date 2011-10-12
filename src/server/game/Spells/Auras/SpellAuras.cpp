@@ -1780,6 +1780,21 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             switch (GetId())
             {
                 case 19746:
+                    if (GetCasterGUID() != target->GetGUID())
+                        break;
+                    // Improved concentration aura - linked aura
+                    if (caster->HasAura(20254) || caster->HasAura(20255) || caster->HasAura(20256))
+                        if (apply)
+                            target->CastSpell(target, 63510, true);
+                        else target->RemoveAura(63510);
+                    if (apply)
+                    {
+                        if ((GetSpellInfo()->Id == 31821 && target->HasAura(19746, GetCasterGUID())) || (GetSpellInfo()->Id == 19746 && target->HasAura(31821)))
+                            target->CastSpell(target, 64364, true);
+                    }
+                    else
+                        target->RemoveAurasDueToSpell(64364, GetCasterGUID());
+                    break;
                 case 31821:
                     // Aura Mastery Triggered Spell Handler
                     // If apply Concentration Aura -> trigger -> apply Aura Mastery Immunity
