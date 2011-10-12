@@ -14520,6 +14520,10 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         if (useCharges && !i->aura->GetCharges())
             continue;
 
+        // Prayer of Mending
+        if ((i->aura->GetId() == 41635 || i->aura->GetId() == 48110 || i->aura->GetId() == 48111) && !damage)
+            continue;
+
         bool takeCharges = false;
         SpellInfo const* spellInfo = i->aura->GetSpellInfo();
         uint32 Id = i->aura->GetId();
