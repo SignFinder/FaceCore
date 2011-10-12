@@ -1408,6 +1408,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->CastSpell(target, 16459, true); // effect's Sword Specialization
                         break;
                 }
+                // Hodir Flash Freeze immunity remove
+                if (GetId() == 61990 && removeMode == AURA_REMOVE_BY_DEATH)
+                    target->RemoveAura(7940);
+
                 break;
             case SPELLFAMILY_MAGE:
                 switch (GetId())
