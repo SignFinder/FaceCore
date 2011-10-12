@@ -785,6 +785,23 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
                 killer->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL, 1, 0, victim);
         }
 
+        // Heirloom trinkets on "kill a target that yields experience or honor" effect
+        if (this->ToPlayer() && this->isAlive())
+            if (this->ToPlayer()->isHonorOrXPTarget(victim))
+            {
+                AuraEffectList const& heirloom = GetAuraEffectsByType(SPELL_AURA_DUMMY);
+                for (AuraEffectList::const_iterator j = heirloom.begin(); j != heirloom.end(); ++j)
+                {
+                     if ((*j)->GetId() == 59915 && this->getPowerType() == POWER_MANA)
+                         this->CastSpell(this,59914,true);
+                     if ((*j)->GetId() == 59906)
+                     {
+                         int32 bonushealth = this->GetMaxHealth() * this->GetAura(59906)->GetEffect(0)->GetAmount() / 100;
+                         this->CastCustomSpell(this,59913,&bonushealth,0,0,true);
+                     }
+                }
+            }
+
         Kill(victim, durabilityLoss);
     }
     else
