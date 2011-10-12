@@ -1373,6 +1373,17 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     return;
                 }
             }
+            // Item - Warrior T10 Melee 4P Bonus
+            if (m_spellInfo->Id == 46916 || m_spellInfo->Id == 52437)
+                if (Aura * aur = m_caster->GetAura(70847))
+                    if (roll_chance_i(20))
+                        m_caster->CastSpell(m_caster, 70849, true);
+            if (Aura * aura = m_caster->GetAura(46916))
+                if (aura->GetCharges())
+                {
+                    m_caster->ToPlayer()->RestoreSpellMods(this, 46916);
+                    aura->DropCharge();
+                }
             break;
         case SPELLFAMILY_WARLOCK:
             // Life Tap
