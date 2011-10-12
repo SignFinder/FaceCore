@@ -1068,6 +1068,9 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 #define ENTRY_FIRE_ELEMENTAL    15438
 #define ENTRY_GHOUL             26125
 #define ENTRY_BLOODWORM         28017
+#define ENTRY_VIPER             19921
+#define ENTRY_VEN_SNAKE         19833
+#define ENTRY_INFERNAL          89
 
 bool Guardian::UpdateStats(Stats stat)
 {
@@ -1219,7 +1222,10 @@ void Guardian::UpdateArmor()
 void Guardian::UpdateMaxHealth()
 {
     UnitMods unitMod = UNIT_MOD_HEALTH;
-    float stamina = GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA);
+
+    float stamina = GetStat(STAT_STAMINA);
+    float baseStam = stamina < 20 ? stamina : 20;
+    float moreStam = stamina - baseStam;
 
     float multiplicator;
     switch (GetEntry())
@@ -1230,6 +1236,8 @@ void Guardian::UpdateMaxHealth()
         case ENTRY_FELHUNTER:   multiplicator = 9.5f;   break;
         case ENTRY_FELGUARD:    multiplicator = 11.0f;  break;
         case ENTRY_BLOODWORM:   multiplicator = 1.0f;   break;
+        case ENTRY_VIPER:       multiplicator = 1.0f;   break;
+        case ENTRY_VEN_SNAKE:   multiplicator = 1.0f;   break;
         default:                multiplicator = 10.0f;  break;
     }
 
@@ -1238,7 +1246,7 @@ void Guardian::UpdateMaxHealth()
     if (GetEntry()==ENTRY_GHOUL)
         value  += GetModifierValue(unitMod, TOTAL_VALUE) + (stamina+GetCreateStat(STAT_STAMINA)) * multiplicator;
     else
-        value  += GetModifierValue(unitMod, TOTAL_VALUE) + stamina * multiplicator;
+        value += GetModifierValue(unitMod, TOTAL_VALUE) + (baseStam + moreStam * multiplicator);
     value  *= GetModifierValue(unitMod, TOTAL_PCT);
 
     SetMaxHealth((uint32)value);
@@ -1328,6 +1336,14 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
             if (frost < 0)
                 frost = 0;
             SetBonusDamage(int32(frost * 0.4f));
+        }
+        else if (GetEntry() == ENTRY_INFERNAL)
+        {
+            int32 fire  = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+            if (fire < 0)
+                fire = 0;
+            SetBonusDamage(int32(fire * 0.15f));
+            bonusAP = fire * 0.57f;
         }
     }
 
