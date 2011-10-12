@@ -60,7 +60,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         plTarget->RemoveAurasDueToSpell(25771);
         if (pl->getPowerType() == POWER_MANA) pl->SetPower(POWER_MANA, pl->GetMaxPower(POWER_MANA));
         if (plTarget->getPowerType() == POWER_MANA) plTarget->SetPower(POWER_MANA, plTarget->GetMaxPower(POWER_MANA));
-	}
+    }
     if (pl->getPowerType() == POWER_RAGE) pl->SetPower(POWER_RAGE, 0);
     if (plTarget->getPowerType() == POWER_RAGE) plTarget->SetPower(POWER_RAGE, 0);
     if (pl->getPowerType() == POWER_RUNIC_POWER) pl->SetPower(POWER_RUNIC_POWER, 0);
