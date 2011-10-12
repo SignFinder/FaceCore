@@ -11731,6 +11731,15 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
                 return true;
     }
 
+    // Spell immune fixes (Death Grip)
+    if (GetTypeId() == TYPEID_PLAYER && spellInfo->Id != 49560)
+    {
+        if (spellInfo->Effects[index].Effect == SPELL_EFFECT_ATTACK_ME)
+            return true;
+        if (spellInfo->Effects[index].ApplyAuraName == SPELL_AURA_MOD_TAUNT)
+            return true;
+    }
+
     return false;
 }
 
