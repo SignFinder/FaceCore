@@ -1447,6 +1447,44 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             if (Unit * owner = caster->GetOwner())
                 if (Aura* pAura = owner->GetAura(53257))
                     pAura->DropCharge();
+
+        // Improved Devouring Plague
+        if (m_spellInfo->Id == 63675 && damageInfo.damage && caster->isAlive())
+            {
+                uint32 healthGain = damageInfo.damage * 15 / 100;
+                healthGain = caster->SpellHealingBonus(caster, m_spellInfo, healthGain, HEAL);
+                caster->HealBySpell(caster, m_spellInfo, healthGain);
+            } 
+
+        // Scourge Strike
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && m_spellInfo->SpellFamilyFlags[1] & 0x08000000)
+        {
+            uint32 count = unitTarget->GetDiseasesByCaster(caster->GetGUID());
+            if (count)
+            {
+                SpellInfo const* ProcSpell = sSpellMgr->GetSpellInfo(70890);
+                SpellNonMeleeDamage damageInfoProc(caster, unitTarget, ProcSpell->Id, ProcSpell->SchoolMask);
+                float ProcModifier = 1.0f;
+                AuraEffect const* pAurEff;
+                pAurEff = caster->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, SPELLFAMILY_DEATHKNIGHT, 154, 0);
+                if (pAurEff)
+                    ProcModifier += (float)pAurEff->GetAmount() / 100.0f;
+                pAurEff = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 97, 1);
+                if (pAurEff)
+                    ProcModifier += (float)pAurEff->GetAmount() / 100.0f;
+                pAurEff = unitTarget->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_DEATHKNIGHT, 0, 0x800, 0x40, caster->GetGUID());
+                if (pAurEff) 
+                    ProcModifier += (float)pAurEff->GetAmount() / 100.0f;
+                damageInfoProc.damage = count * CalculateDamage(EFFECT_2, unitTarget) * ProcModifier * (damageInfo.damage + damageInfo.absorb) / 100;
+                // Add bonuses and fill damageInfo struct 
+                caster->CalcAbsorbResist(unitTarget, SpellSchoolMask(ProcSpell->SchoolMask), SPELL_DIRECT_DAMAGE, damageInfoProc.damage, &damageInfoProc.absorb, &damageInfoProc.resist, ProcSpell);
+                caster->DealDamageMods(damageInfoProc.target,damageInfoProc.damage,&damageInfoProc.absorb);
+                damageInfoProc.damage -= damageInfoProc.absorb + damageInfoProc.resist;
+                caster->SendSpellNonMeleeDamageLog(&damageInfoProc);
+                caster->DealSpellDamage(&damageInfoProc, true);
+            }
+        }
+
         m_damage = damageInfo.damage;
     }
 
