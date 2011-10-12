@@ -7395,6 +7395,13 @@ void Spell::PrepareTriggersExecutedOnHit()
                  m_preCastSpell = 68391;
              break;
         }
+        case SPELLFAMILY_DEATHKNIGHT:
+        {
+            // Frost Fever (prevents proc of Chilblains at login)
+            if (m_spellInfo->Id == 59921 && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->GetSession()->PlayerLoading())
+                return;
+            break;
+        }
     }
 
     // handle SPELL_AURA_ADD_TARGET_TRIGGER auras:
