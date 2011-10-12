@@ -6377,6 +6377,16 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     // if not found Rip
                     return false;
                 }
+                // Nature's Grasp
+                case 16689:
+                {
+                    if (procSpell->SpellVisual[0] == 212 && procSpell->SpellIconID != 168)
+                        return false;
+
+                    triggered_spell_id = 19975;
+                    target = this;
+                    break;
+                }
                 // Glyph of Rake
                 case 54821:
                 {
