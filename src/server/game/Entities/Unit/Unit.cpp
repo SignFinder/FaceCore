@@ -8931,6 +8931,24 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
+        // Glyph of Shadow only in shadow form
+        case 55689:
+            if (GetTypeId() == TYPEID_PLAYER)
+                if (Player * plr = this->ToPlayer())
+                    if (plr->GetShapeshiftForm() != FORM_SHADOW)
+                        return false;
+            break;
+        case 71761: // Deep Freeze Immunity State
+        {
+            if (!victim->ToCreature())
+                return false;
+
+            if (victim->ToCreature()->GetCreatureInfo()->MechanicImmuneMask & (1 << procSpell->Effects[EFFECT_0].Mechanic))
+                target = victim;
+            else
+                return false;
+            break;
+        }
         default:
             break;
     }
