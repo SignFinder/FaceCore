@@ -1357,7 +1357,8 @@ bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
 
     float ox, oy, oz;
     obj->GetPosition(ox, oy, oz);
-    return(IsWithinLOS(ox, oy, oz));
+    //return(IsWithinLOS(ox, oy, oz));
+    return (IsWithinLOS(ox, oy, oz) && GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz));
 }
 
 bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
@@ -1365,7 +1366,8 @@ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
     float x, y, z;
     GetPosition(x, y, z);
     VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-    return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);
+    //return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);
+    return (vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f) && GetMap()->IsInDynLOS(GetPositionX(), GetPositionY(), GetPositionZ(), ox, oy, oz));
 }
 
 bool WorldObject::GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D /* = true */) const
@@ -2710,8 +2712,18 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
         // move back a bit
         destx -= CONTACT_DISTANCE * cos(angle);
         desty -= CONTACT_DISTANCE * sin(angle);
-        dist = sqrt((pos.m_positionX - destx)*(pos.m_positionX - destx) + (pos.m_positionY - desty)*(pos.m_positionY - desty));
+        //dist = sqrt((pos.m_positionX - destx)*(pos.m_positionX - destx) + (pos.m_positionY - desty)*(pos.m_positionY - desty));
     }
+
+    while (!GetMap()->IsInDynLOS(pos.m_positionX, pos.m_positionY, pos.m_positionZ, destx, desty, destz))
+    {
+        destx -= 2.0f * cos(angle);
+        desty -= 2.0f * sin(angle);
+        col = true;
+    }
+
+    if (col)
+        dist = sqrt((pos.m_positionX - destx)*(pos.m_positionX - destx) + (pos.m_positionY - desty)*(pos.m_positionY - desty));
 
     float step = dist/10.0f;
 
