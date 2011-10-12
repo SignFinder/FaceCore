@@ -2307,6 +2307,19 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                     case 75532:
                         target->SetDisplayId(target->getGender() == GENDER_MALE ? 31737 : 31738);
                         break;
+                    // Gossip NPC Appearance - Day of the Dead (DotD)
+                    case 65529:
+                        // random, regardless of current gender
+                        target->SetDisplayId(roll_chance_i(50) ? 29203 : 29204);
+                        break;
+                    // Crown Parcel Service Uniform
+                    case 71450:
+                        target->SetDisplayId(target->getGender() == GENDER_MALE ? 31002 : 31003);
+                        break;
+                    // Gnomeregan Pride
+                    case 75531:
+                        target->SetDisplayId(31654);
+                        break;
                     default:
                         break;
                 }
