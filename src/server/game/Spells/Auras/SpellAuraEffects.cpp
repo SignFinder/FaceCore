@@ -5270,6 +5270,40 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     caster->ToPlayer()->StopCastingBindSight();
                 return;
             }
+
+            switch(GetId())
+            {
+                // Sentry Totem (Serverside)
+                case 6494:
+                {
+                    if (Player * pCaster = caster->ToPlayer())
+                    {
+                        pCaster->StopCastingBindSight();
+                        if (apply)
+                        {
+                            uint64 guid = pCaster->m_SummonSlot[4];
+                            if (guid)
+                            {
+                                Creature * totem = pCaster->GetMap()->GetCreature(guid);
+                                if (totem && totem->isTotem())
+                                    pCaster->CastSpell(totem, 6496, true);
+                            }
+                        }
+                        else
+                            pCaster->RemoveAurasDueToSpell(6495);
+                    }
+                    break;
+                }
+                // Sentry Totem (hack for login case)
+                case 6495:
+                {
+                    if (caster->GetTypeId() == TYPEID_PLAYER && apply)
+                        if (!caster->m_SummonSlot[4])
+                            caster->RemoveAurasDueToSpell(6495);
+                    break;
+                }
+            }
+
             break;
         }
         case SPELLFAMILY_PALADIN:
