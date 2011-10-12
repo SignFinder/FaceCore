@@ -4839,6 +4839,21 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     caster->CastCustomSpell(target, 63338, &damage, NULL, NULL, true);
                     break;
                 }
+                case 74401: // Cosmetic - Parachute
+                {
+                    caster->CastSpell(caster, GetAmount(), true);
+                    break;
+                }
+                case 75572: // Eject!
+                {
+                    if (Vehicle *vehicle = caster->GetVehicleKit())
+                        if (Unit *driver = vehicle->GetPassenger(0))
+                        {
+                            driver->ExitVehicle();
+                            driver->GetMotionMaster()->MoveJump(driver->GetPositionX(), driver->GetPositionY(), driver->GetPositionZ()+7.0f, 1.5f, 1.5f);
+                        }
+                    break;
+                }
                 case 71563:
                     if (Aura* newAura = target->AddAura(71564, target))
                         newAura->SetStackAmount(newAura->GetSpellInfo()->StackAmount);
