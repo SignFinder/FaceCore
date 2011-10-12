@@ -540,7 +540,7 @@ void Creature::Update(uint32 diff)
                     RemoveAurasDueToSpell(36444);
             }
 				
-			if (m_regenTimer > 0)
+            if (m_regenTimer > 0)
             {
                 if (diff >= m_regenTimer)
                     m_regenTimer = 0;
