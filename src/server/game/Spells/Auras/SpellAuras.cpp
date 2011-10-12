@@ -1822,6 +1822,34 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     break;
             }
+
+            if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_AURA)
+            {
+                if (GetCasterGUID() == target->GetGUID())
+                {
+                    // Sanctified Retribution
+                    if (target->HasAura(31869))
+                    {
+                        target->RemoveAurasDueToSpell(63531);
+                        if (apply)
+                            target->CastSpell(target, 63531, true);
+                    }
+                    // Improved Devotion Aura
+                    if (target->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 291, 1))
+                    {
+                        target->RemoveAurasDueToSpell(63514);
+                        if (apply)
+                            target->CastSpell(target, 63514, true);
+                    }
+                    // Improved Concentration Aura
+                    if (target->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_PALADIN, 1487, 0))
+                    {
+                        target->RemoveAurasDueToSpell(63510);
+                        if (apply)
+                            target->CastSpell(target, 63510, true);
+                    }
+                }
+            }
             break;
         case SPELLFAMILY_DEATHKNIGHT:
             if (GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_PRESENCE)
