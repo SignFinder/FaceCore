@@ -6849,6 +6849,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Judgement of Light
                 case 20185:
                 {
+                    if (!victim)
+                        return false;
+
                         // 2% of base mana
                         basepoints0 = int32(victim->CountPctFromMaxHealth(2));
                         victim->CastCustomSpell(victim, 20267, &basepoints0, 0, 0, true, 0, triggeredByAura);
