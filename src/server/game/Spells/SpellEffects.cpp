@@ -628,6 +628,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00200000, 0, 0))
                             AddPctN(damage, aurEff->GetAmount());
                 }
+                // Item - Druid T10 Balance 2P Bonus
+                if (m_spellInfo->Id == 16870 && m_caster->HasAura(70718))
+                    m_caster->CastSpell(m_caster, 70721, true);
                 break;
             }
             case SPELLFAMILY_ROGUE:
