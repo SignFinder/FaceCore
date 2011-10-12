@@ -5110,7 +5110,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_BAD_TARGETS;
 
                 }
-				else if (m_spellInfo->Id == 51690)          // Killing Spree
+                else if (m_spellInfo->Id == 51690)          // Killing Spree
                 {
                     float range = 10.0f;
                     Unit *target = NULL;
@@ -5445,7 +5445,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_BAD_TARGETS;
                 break;
             }
-			case SPELL_EFFECT_REDIRECT_THREAT:
+            case SPELL_EFFECT_REDIRECT_THREAT:
             {
                 // Tricks of the Trade
                 if (m_spellInfo->Id == 57934 && m_targets.GetUnitTarget() &&
