@@ -5110,6 +5110,22 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_BAD_TARGETS;
 
                 }
+				else if (m_spellInfo->Id == 51690)          // Killing Spree
+                {
+                    float range = 10.0f;
+                    Unit *target = NULL;
+                    Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck u_check(m_caster, range);
+                    Trinity::UnitLastSearcher<Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck> checker(m_caster, target, u_check);
+                    m_caster->VisitNearbyObject(range, checker);
+
+                    if (target)
+                    {
+                        if (m_caster->GetUnitMovementFlags() & MOVEMENTFLAG_ONTRANSPORT)
+                            return SPELL_FAILED_NOT_HERE;
+                    }
+                    else
+                        return SPELL_FAILED_OUT_OF_RANGE;
+                }
                 break;
             }
             case SPELL_EFFECT_LEARN_SPELL:
