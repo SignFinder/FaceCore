@@ -6191,6 +6191,14 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
                     caster->CastSpell(target, triggerSpellId, false);
                 return;
             }
+            // Rapid Recuperation (triggered energize have basepoints == 0)
+            case 56654:
+            case 58882:
+            {
+                if (int32 mana = target->GetMaxPower(POWER_MANA) / 100 * GetAmount())
+                    target->CastCustomSpell(target, triggerSpellId, &mana, NULL, NULL, true, NULL, this);
+                return;
+            }
         }
     }
 
