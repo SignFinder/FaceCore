@@ -11075,6 +11075,8 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         case  849: modChance+= 17;
                             if (!victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                                 break;
+                            // Deep Freeze damage trigger is always shattered and does not consume FoF charges
+                            if ((spellProto->Id == 71757) || victim->HasAuraState(AURA_STATE_FROZEN, spellProto, this))
                             crit_chance+=modChance;
                             break;
                         case 7917: // Glyph of Shadowburn
