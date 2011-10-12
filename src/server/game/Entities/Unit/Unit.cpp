@@ -5727,6 +5727,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 if (!procSpell)
                     return false;
 
+                // Very ugly hacks here. This required for triggered and AOE spells
+                uint32 costPercent = procSpell->ManaCostPercentage;
+                if (procSpell->SpellFamilyFlags[0] & 0x200000)     // Arcane Missiles
+                    costPercent = 6;
+                else if (procSpell->SpellFamilyFlags[0] & 0x80)    // Blizzard
+                    costPercent = urand(1,9);
+                else if (procSpell->SpellFamilyFlags[1] & 0x10000) // Living Bomb
+                    costPercent = urand(1,22);
+                // Dragon's Breath, Arcane Explosion, Cone of Cold, Frost Nova, Flamestrike, Blast Wave
+                else if (procSpell->SpellFamilyFlags[0] & 0x801244 || procSpell->SpellFamilyFlags[1] & 0x40)
+                    costPercent = urand(1,costPercent);
+
                 // mana cost save
                 int32 cost = int32(procSpell->ManaCost + CalculatePctU(GetCreateMana(), procSpell->ManaCostPercentage));
                 basepoints0 = CalculatePctN(cost, triggerAmount);
