@@ -2182,6 +2182,23 @@ void Spell::EffectApplyAura(SpellEffIndex effIndex)
         return;
     ASSERT(unitTarget == m_spellAura->GetOwner());
     m_spellAura->_ApplyEffectForTargets(effIndex);
+
+    switch (m_spellInfo->Id)
+    {
+        case 29131:
+        {
+            // Warrior T10(Tank) 4 items bonus
+            if (unitTarget->HasAura(70844))
+            {
+                int32 absorbtion = m_caster->GetMaxHealth();
+                absorbtion = int32(absorbtion * 0.20f);
+                m_caster->CastCustomSpell(m_caster, 70845, &absorbtion, NULL, NULL, true);
+            }
+            break;
+        }
+        default: 
+            break;
+    }
 }
 
 void Spell::EffectApplyAreaAura(SpellEffIndex effIndex)
