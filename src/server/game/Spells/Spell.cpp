@@ -2692,6 +2692,17 @@ uint32 Spell::SelectEffectTargets(uint32 i, SpellImplicitTargetInfo const& cur)
             case TARGET_UNIT_CONE_ENEMY_24:
             case TARGET_UNIT_CONE_ENEMY_54:
             case TARGET_UNIT_CONE_ENEMY_104:
+                //Spell Decimate with id 71123 has wrong radius value inside Spell.dbc file.
+                //So, there is a hack here: set radius the same as for Gluth's Decimate - 200 yards
+                if (m_spellInfo->Id == 71123 && i == 0 && cur.GetTarget() == TARGET_UNIT_SRC_AREA_ENTRY)
+                    radius = 200.0f;
+                //Stinky's aura has 0 radius, but should apply to everyone in his line of sight
+                else if ((m_spellInfo->Id == 71805 || m_spellInfo->Id == 71161 || m_spellInfo->Id == 71160) && cur.GetTarget() == TARGET_UNIT_DEST_AREA_ENEMY)
+                    radius = 200.0f;
+                //Lich King's Defile. Actual targets are filtered through custom SpellScript.
+                else if (m_spellInfo->Id == 72754 || m_spellInfo->Id == 73708 || m_spellInfo->Id == 73709 || m_spellInfo->Id == 73710)
+                    radius = 200.0f;
+                else
                 radius = m_spellInfo->Effects[i].CalcRadius();
                 targetType = SPELL_TARGETS_ENEMY;
                 break;
