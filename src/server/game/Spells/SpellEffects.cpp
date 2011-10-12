@@ -4666,6 +4666,24 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     return;
                         
                 }
+                // Gender spells
+                case 48762:                                 // A Fall from Grace: Scarlet Raven Priest Image - Master
+                case 45759:                                 // Warsong Orc Disguise
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint8 gender = unitTarget->getGender();
+                    uint32 spellId;
+                    switch (m_spellInfo->Id)
+                    {
+                        case 48762: spellId = (gender == GENDER_MALE ? 48763 : 48761); break;
+                        case 45759: spellId = (gender == GENDER_MALE ? 45760 : 45762); break;
+                        default: return;
+                    }
+                    unitTarget->CastSpell(unitTarget, spellId, true);
+                    return;
+                }
                 //Teleport to Lake Wintergrasp
                 case 58622:
                 {
