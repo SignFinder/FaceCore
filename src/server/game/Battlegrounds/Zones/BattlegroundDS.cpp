@@ -37,9 +37,6 @@ BattlegroundDS::BattlegroundDS()
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
     m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_ARENA_FIFTEEN_SECONDS;
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
-
-    m_knockback = 5000;
-    m_knockbackCheck = true;
 }
 
 BattlegroundDS::~BattlegroundDS()
@@ -221,8 +218,6 @@ void BattlegroundDS::Reset()
 {
     //call parent's class reset
     Battleground::Reset();
-    m_knockback = 5000;
-    m_knockbackCheck = true;
 }
 
 bool BattlegroundDS::SetupBattleground()
