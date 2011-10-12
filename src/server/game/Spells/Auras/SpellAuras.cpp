@@ -1610,6 +1610,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 // Remove Vanish on stealth remove
                 if (GetId() == 1784)
                     target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, target->GetGUID());
+                // Savage Combat triggered at poisons apply
+                if (GetSpellInfo()->SpellFamilyFlags[1] & 0x80000 && caster)
+                {
+                    if (AuraEffect * auraEff = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_ROGUE, 1959, 0))
+                    {
+                        uint32 spellId = auraEff->GetSpellInfo()->Effects[0].TriggerSpell;
+                        target->RemoveAurasDueToSpell(spellId);
+                        if (Aura * newAura = target->AddAura(spellId, caster))
+                            newAura->SetDuration(GetDuration());
+                    }
+                }
                 break;
             case SPELLFAMILY_PALADIN:
                 switch (GetId())
