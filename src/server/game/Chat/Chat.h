@@ -132,6 +132,7 @@ class ChatHandler
         bool ShowHelpForSubCommands(ChatCommand* table, char const* cmd, char const* subcmd);
 
         bool HandleNameAnnounceCommand(const char* args);
+        bool HandleAdminAnnounceCommand(const char* args);
         bool HandleGMNameAnnounceCommand(const char* args);
         bool HandleGMAnnounceCommand(const char* args);
         bool HandleGMNotifyCommand(const char* args);

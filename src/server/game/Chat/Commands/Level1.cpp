@@ -54,6 +54,16 @@ bool ChatHandler::HandleNameAnnounceCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleAdminAnnounceCommand(const char* args)
+{
+    WorldPacket data;
+    if(!*args)
+        return false;
+
+    sWorld->SendWorldText(LANG_ANNOUNCE_COLORADMIN, m_session->GetPlayer()->GetName(), args);
+    return true;
+}
+
 bool ChatHandler::HandleGMNameAnnounceCommand(const char* args)
 {
     WorldPacket data;

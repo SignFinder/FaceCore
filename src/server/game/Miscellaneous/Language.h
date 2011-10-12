@@ -25,6 +25,10 @@ enum TrinityStrings
     LANG_SELECT_CHAR_OR_CREATURE        = 1,
     LANG_SELECT_CREATURE                = 2,
 
+    //JarGamesCore
+    LANG_ANNOUNCE_COLORR                 = 506334,
+    LANG_ANNOUNCE_COLORADMIN             = 506333,
+
     // level 0 chat
     LANG_SYSTEMMESSAGE                  = 3,
     LANG_EVENTMESSAGE                   = 4,
