@@ -308,6 +308,50 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
         }
 };
 
+class spell_warl_demonic_circle_summon : public SpellScriptLoader
+{
+public:
+    spell_warl_demonic_circle_summon() : SpellScriptLoader("spell_warl_demonic_circle_summon") { }
+
+    class spell_warl_demonic_circle_summon_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_demonic_circle_summon_SpellScript)
+
+        SpellCastResult CheckIfInvalidPosition()
+        {
+            Unit* caster = GetCaster();
+            switch (caster->GetMapId())
+            {
+                case 617: // Dalaran Sewers
+                    // casting on starting pipes
+                    if (caster->GetPositionZ() > 13.0f)
+                        return SPELL_FAILED_NOT_HERE;
+                    break;
+                case 618: // Ring of Valor
+                    if(caster->GetDistance2d(763.632385f, -306.162384f) < 1.5f || // casting over a small pilar
+                        caster->GetDistance2d(763.611145f, -261.856750f) < 1.5f ||
+                        caster->GetDistance2d(723.644287f, -284.493256f) < 4.0f || // casting over a big pilar
+                        caster->GetDistance2d(802.211609f, -284.493256f) < 4.0f ||
+                        caster->GetPositionZ() < 28.0f) // casting on the elevator
+                        return SPELL_FAILED_NOT_HERE;
+                    break;
+            }
+
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_warl_demonic_circle_summon_SpellScript::CheckIfInvalidPosition);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_demonic_circle_summon_SpellScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_banish();
@@ -316,4 +360,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_everlasting_affliction();
     new spell_warl_ritual_of_doom_effect();
     new spell_warl_seed_of_corruption();
+    new spell_warl_demonic_circle_summon();
 }
