@@ -5653,6 +5653,14 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 break;
             }
+            case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
+            {
+                // Pain Suppression
+                if (m_spellInfo->Id == 33206)
+                    if (!m_caster->HasAura(63248) && m_caster->HasAuraType(SPELL_AURA_MOD_STUN))
+                        return SPELL_FAILED_STUNNED;                   
+                break;
+            }
             default:
                 break;
         }
