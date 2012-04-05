@@ -48,7 +48,7 @@ enum Creatures
         CREATURE_ARCTURIS                                       = 38453,
 };
  
-#define main    100
+//#define main    100
 #define pets    200
 #define exotic  300
 // Pets
