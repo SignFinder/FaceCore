@@ -416,6 +416,8 @@ public:
             returned = true;
             burned = false;
             IsFlying = false;
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            
             DoCast(me, SPELL_HEAD);
             if (headGUID)
             {
