@@ -180,6 +180,13 @@ void Vehicle::ApplyAllImmunities()
             // why we need to apply this? we can simple add immunities to slow mechanic in DB
             _me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
             break;
+        case 321: // Pilgrims Bount: Chair
+        case 452: // Gunship Cannon Aliance
+        case 453: // Gunship Cannon Horde
+        case 554: // ICC Gunship Cannon
+            _me->SetControlled(true, UNIT_STAT_ROOT);
+			_me->SetControlled(false, UNIT_STAT_ROOT);
+            break;
         default:
             break;
     }

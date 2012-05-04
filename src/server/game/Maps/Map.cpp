@@ -2039,6 +2039,27 @@ void Map::SendInitTransports(Player* player)
         }
     }
 
+    // player in instance, send script transport
+    if (player->GetInstanceId() != 0)
+    {
+        MapManager::TransportMap& timap = sMapMgr->m_TransportsByInstanceIdMap;
+
+        // no transports at map
+        if (timap.find(player->GetInstanceId()) == timap.end())
+            return;
+
+        MapManager::TransportSet& tiset = timap[player->GetInstanceId()];
+
+        for (MapManager::TransportSet::const_iterator i = tiset.begin(); i != tiset.end(); ++i)
+        {
+            // send data for current transport in other place
+            if ((*i) != player->GetTransport())
+            {
+                (*i)->BuildCreateUpdateBlockForPlayer(&transData, player);
+            }
+        }
+    }
+
     WorldPacket packet;
     transData.BuildPacket(&packet);
     player->GetSession()->SendPacket(&packet);
