@@ -1,27 +1,9 @@
-/*
- * Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
-#include "ScriptPCH.h"
 #include "icecrown_citadel.h"
 #include "MapManager.h"
+#include "Transport.h"
 #include "Vehicle.h"
 #include "Group.h"
-  
+
 enum Actions
 {
     ACTION_INTRO_START             = 1,
@@ -31,12 +13,6 @@ enum Actions
     ACTION_AXES_RIFL_DIE           = 5,
     ACTION_DONE                    = 6,
     ACTION_FAIL                    = 7,
-};
-
-enum eAchievements
-{
-    IM_ON_A_BOAT_10    = 4536,
-    IM_ON_A_BOAT_25    = 4612
 };
 
 enum Spells
@@ -309,6 +285,7 @@ struct mortarMarksLoc
     Position location;
 };
 
+
 //Function find player special for Gunship battle
 typedef std::list<Player*> TPlayerLists;
 
@@ -346,7 +323,7 @@ void StartFlyShip(Transport* t)
     t->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
     t->SetGoState(GO_STATE_ACTIVE);
     t->SetUInt32Value(GAMEOBJECT_DYNAMIC, 0x10830010); // Seen in sniffs
-    t->SetFloatValue(GAMEOBJECT_PARENTROTATION 3, 1.0f);
+    t->SetFloatValue(GAMEOBJECT_PARENTROTATION + 3, 1.0f);
 
     Map* map = t->GetMap();
     std::set<uint32> mapsUsed;
@@ -507,7 +484,7 @@ void DoCheckFallingPlayer(Creature* me)
                 if (Player* pPlayer = itr->getSource())
                 {
                     if (pPlayer->GetPositionZ() < 420.0f && pPlayer->IsWithinDistInMap(me, 300.0f))
-                        pPlayer->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() 5.0f, me->GetOrientation());
+                        pPlayer->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 5.0f, me->GetOrientation());
                 }
             }
         }
@@ -881,11 +858,11 @@ public:
             case ACTION_DONE:
                 if (Creature* pAllianceBoss = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SKYBREAKER_BOSS)))
                 {
-                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, pAllianceBoss);
+                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pAllianceBoss);
                 }
                 if (Creature* pHordeBoss = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORGRIMMAR_HAMMER_BOSS)))
                 {
-                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, pHordeBoss);
+                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pHordeBoss);
                 }
 
                 me->SetReactState(REACT_PASSIVE);
@@ -904,11 +881,11 @@ public:
                 Talk(SAY_ALLIANCE_DEFEAT);
                 if (Creature* pAllianceBoss = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SKYBREAKER_BOSS)))
                 {
-                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, pAllianceBoss);
+                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pAllianceBoss);
                 }
                 if (Creature* pHordeBoss = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORGRIMMAR_HAMMER_BOSS)))
                 {
-                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, pHordeBoss);
+                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pHordeBoss);
                 }
                 StopFight(skybreaker, CheckUnfriendlyShip(me, _instance, DATA_GB_HIGH_OVERLORD_SAURFANG));
                 events.ScheduleEvent(EVENT_FAIL, 10000);
@@ -954,7 +931,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             if (!HealthAbovePct(75))
@@ -1080,7 +1057,7 @@ public:
                     break;
                 case EVENT_OUTRO_ALLIANCE_2:
                     StopFlyShip(skybreaker);
-                    me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_A_10N, GO_CAPITAN_CHEST_A_25N, GO_CAPITAN_CHEST_A_10H, GO_CAPITAN_CHEST_A_25H), -554.228f, 2221.693115f, 539.588269f, 0, 0, 0, 0, 0, 100000);
+                    //me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_A_10N, GO_CAPITAN_CHEST_A_25N, GO_CAPITAN_CHEST_A_10H, GO_CAPITAN_CHEST_A_25H), -554.228f, 2221.693115f, 539.588269f, 0, 0, 0, 0, 0, 100000);
                     me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                     me->GetMotionMaster()->MovePoint(0, -590.700f, 2213.01f, 539.1f);
                     break;
@@ -1187,9 +1164,9 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             SetCombatMovement(false);
-            _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
+            _instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             if (Creature* orgri = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORGRIMMAR_HAMMER_BOSS)))
-                _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, orgri);
+                _instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, orgri);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
 
@@ -1208,6 +1185,9 @@ public:
             {
                 if (Creature* pSaurfang = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_GB_HIGH_OVERLORD_SAURFANG)))
                     pSaurfang->AI()->DoAction(ACTION_DONE);
+                _instance->SetBossState(DATA_GUNSHIP_EVENT, DONE);
+                _instance->DoCastSpellOnPlayers(SPELL_REMOVE_ROCKET_PACK);
+                me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_H_10N, GO_CAPITAN_CHEST_H_25N, GO_CAPITAN_CHEST_H_10H, GO_CAPITAN_CHEST_H_25H), -554.228f, 2221.645f, 538.588269f, 0, 0, 0, 0, 0, 100000);
             }
         }
 
@@ -1246,9 +1226,9 @@ public:
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             SetCombatMovement(false);
-            _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, me);
+            _instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
             if (Creature* sky = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SKYBREAKER_BOSS)))
-                _instance->SendEncounterUnit(ENCOUNTER_FRAME_ADD, sky);
+                _instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, sky);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
 
@@ -1261,6 +1241,9 @@ public:
             {
                 if (Creature* pMuradin = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_GB_MURADIN_BRONZEBEARD)))
                     pMuradin->AI()->DoAction(ACTION_DONE);
+                _instance->SetBossState(DATA_GUNSHIP_EVENT, DONE);
+                _instance->DoCastSpellOnPlayers(SPELL_REMOVE_ROCKET_PACK);
+                me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_A_10N, GO_CAPITAN_CHEST_A_25N, GO_CAPITAN_CHEST_A_10H, GO_CAPITAN_CHEST_A_25H), -554.228f, 2221.693115f, 538.588269f, 0, 0, 0, 0, 0, 100000);
             }
 
             else if(_instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE)
@@ -1341,7 +1324,7 @@ public:
             if (_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
                 return;
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             me->AI()->AttackStart(SelectRandomPlayerInTheMaps(me->GetMap()));
@@ -1447,7 +1430,7 @@ public:
             if(_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
                 return;
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             events.Update(diff);
@@ -1578,7 +1561,7 @@ public:
             if(_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
                 return;
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             events.Update(diff);
@@ -1721,7 +1704,7 @@ public:
             if(_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
                 return;
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             if (me->GetGUID() == _instance->GetData64(DATA_GB_BATTLE_MAGE))
@@ -1786,21 +1769,21 @@ public:
                     attacker->DealDamage(pHordeBoss, damage);
             }
         }
-  
+
         void UpdateAI(const uint32 diff)
         {
             if (me->GetEntry() == NPC_GB_HORDE_CANON)
                 me->SetOrientation(1.53591f);
             else if (me->GetEntry() == NPC_GB_ALLIANCE_CANON)
                 me->SetOrientation(4.72416f);
-  
+
             me->SendMovementFlagUpdate();
-  
+
             if(me->HasAura(SPELL_BELOW_ZERO))
             {
                 me->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-  
+
                 if (Vehicle* veh = me->GetVehicleKit())
                     veh->RemoveAllPassengers();
             }
@@ -1809,17 +1792,17 @@ public:
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
         }
-  
+
     };
-  
+
     CreatureAI* GetAI(Creature* pCreature) const
     {
         return new npc_gunship_cannonAI(pCreature);
     }
 };
-  
+
 class npc_mortar_soldier_or_rocketeer : public CreatureScript
-  {
+{
 public:
     npc_mortar_soldier_or_rocketeer() : CreatureScript("npc_mortar_soldier_or_rocketeer") { }
 
@@ -1861,7 +1844,7 @@ public:
             if(_instance->GetBossState(DATA_GUNSHIP_EVENT) != IN_PROGRESS)
                 return;
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             events.Update(diff);
@@ -1912,10 +1895,10 @@ public:
     {
         return new npc_mortar_soldier_or_rocketeerAI(pCreature);
     }
-  };
+};
 
 class npc_zafod_boombox : public CreatureScript
-  {
+{
 public:
     npc_zafod_boombox() : CreatureScript("npc_zafod_boombox") { }
 
@@ -1958,8 +1941,8 @@ public:
 
         return true;
     }
-  };
-  
+};
+
 //
 class npc_saurfang_gunship : public CreatureScript
 {
@@ -2091,11 +2074,11 @@ public:
             case ACTION_DONE:
                 if (Creature* pAllianceBoss = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SKYBREAKER_BOSS)))
                 {
-                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, pAllianceBoss);
+                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pAllianceBoss);
                 }
                 if (Creature* pHordeBoss = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORGRIMMAR_HAMMER_BOSS)))
                 {
-                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, pHordeBoss);
+                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pHordeBoss);
                 }
 
                 me->SetReactState(REACT_PASSIVE);
@@ -2114,11 +2097,11 @@ public:
                 Talk(SAY_HORDE_DEFEAT);
                 if (Creature* pHordeBoss = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ORGRIMMAR_HAMMER_BOSS)))
                 {
-                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, pHordeBoss);
+                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pHordeBoss);
                 }
                 if (Creature* pAllianceBoss = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SKYBREAKER_BOSS)))
                 {
-                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, pAllianceBoss);
+                    _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, pAllianceBoss);
                 }
                 StopFight(orgrimmar,CheckUnfriendlyShip(me,_instance, DATA_GB_MURADIN_BRONZEBEARD));
                 events.ScheduleEvent(EVENT_FAIL, 10000);
@@ -2164,7 +2147,7 @@ public:
 
         void UpdateAI(const uint32 diff)
         {
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             if(_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
@@ -2271,7 +2254,7 @@ public:
                     break;
                 case EVENT_OUTRO_HORDE_2:
                     StopFlyShip(orgrimmar);
-                    me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_H_10N, GO_CAPITAN_CHEST_H_25N, GO_CAPITAN_CHEST_H_10H, GO_CAPITAN_CHEST_H_25H), -554.228f, 2221.645f, 540.588269f, 0, 0, 0, 0, 0, 100000);
+                    //me->SummonGameObject(RAID_MODE(GO_CAPITAN_CHEST_H_10N, GO_CAPITAN_CHEST_H_25N, GO_CAPITAN_CHEST_H_10H, GO_CAPITAN_CHEST_H_25H), -554.228f, 2221.645f, 539.588269f, 0, 0, 0, 0, 0, 100000);
                     me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                     me->GetMotionMaster()->MovePoint(0, -590.700f, 2213.01f, 539.1f);
                     break;
@@ -2337,14 +2320,14 @@ public:
                     break;
                 }
             }
-  
+
             if (!me->GetCurrentSpell(CURRENT_MELEE_SPELL))
                 DoCastVictim(SPELL_CLEAVE);
 
             DoMeleeAttackIfReady();
         }
-  
-  
+
+
     private:
         Transport* orgrimmar;
         uint32 RocketerDieCount;
@@ -2364,9 +2347,9 @@ public:
         return new npc_saurfang_gunshipAI(pCreature);
     }
 };
-  
+
 class npc_gunship_portal : public CreatureScript
-  {
+{
 public:
     npc_gunship_portal() : CreatureScript("npc_gunship_portal") { }
 
@@ -2414,9 +2397,9 @@ public:
     {
         return new npc_gunship_portalAI(pCreature);
     }
-  };
-  
-  
+};
+
+
 class npc_gunship_trigger : public CreatureScript
 {
 public:
@@ -2436,49 +2419,49 @@ public:
             me->SetReactState(REACT_PASSIVE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
         }
-  
+
         void EnterCombat(Unit* /*who*/)
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             SetCombatMovement(false);
         }
-  
+
         void DamageTaken(Unit* attacker, uint32& damage)
         {
             damage = 0;
         }
-  
+
         void UpdateAI(const uint32 diff)
         {
-  
+
         }
-  
+
     private:
         EventMap events;
         InstanceScript* _instance;
     };
-  
+
     CreatureAI* GetAI(Creature* pCreature) const
     {
         return new npc_gunship_triggerAI(pCreature);
     }
-  };
-  
+};
+
 /* ----------------------------------- Rampart of Skulls NPCs ----------------------------------- */
-  
+
 /* Kor'kron Primalist  37030*/
 class npc_korkron_primalist: public CreatureScript
-  {
+{
 public:
     npc_korkron_primalist() : CreatureScript("npc_korkron_primalist") { }
-  
+
     struct npc_korkron_primalistAI : public ScriptedAI
     {
         npc_korkron_primalistAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
         }
-  
+
         void Reset()
         {
             _started = instance->GetBossState(DATA_GUNSHIP_EVENT) == DONE;
@@ -2486,20 +2469,20 @@ public:
             events.ScheduleEvent(EVENT_WRATH, 10000); // TODO: Fix the timers
             events.ScheduleEvent(EVENT_HEAL, 20000); // TODO: Fix the timers
         }
-  
+
         void MoveInLineOfSight(Unit* who)
         {
             if (!instance)
                 return;
-  
+
             if (instance->GetData(DATA_TEAM_IN_INSTANCE) != HORDE)
                 return;
 
             if (who->GetTypeId() != TYPEID_PLAYER)
-                  return;
+                return;
 
             if (instance->GetData(DATA_FIRST_SQUAD_STATE) == DONE)
-                  return;
+                return;
 
             if (!_started && me->IsWithinDistInMap(who, 25.0f))
             {
@@ -2507,22 +2490,22 @@ public:
                 events.ScheduleEvent(EVENT_FIRST_SQUAD_ASSISTED_1, 1000);
                 events.ScheduleEvent(EVENT_FIRST_SQUAD_ASSISTED_2, 15000); // TODO : fix the timer
             }
-          }
+        }
 
         void UpdateAI(const uint32 diff)
         {
             if (!instance)
-                  return;
+                return;
 
-            if (me->HasUnitState(UNIT_STAT_CASTING))
-                  return;
-  
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             events.Update(diff);
-  
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
-                  {
+                {
                 case EVENT_FIRST_SQUAD_ASSISTED_1:
                     Talk(SAY_FIRST_SQUAD_RESCUED_HORDE_0);
                     break;
@@ -2570,7 +2553,7 @@ public:
             }
 
             DoMeleeAttackIfReady();
-          }
+        }
 
     private:
         bool _started;
@@ -2582,21 +2565,21 @@ public:
     {
         return new npc_korkron_primalistAI(pCreature);
     }
-  };
-  
+};
+
 /* Kor'kron Defender  37032*/
 class npc_korkron_defender: public CreatureScript
-  {
+{
 public:
     npc_korkron_defender() : CreatureScript("npc_korkron_defender") { }
-  
+
     struct npc_korkron_defenderAI : public ScriptedAI
     {
         npc_korkron_defenderAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
         }
-  
+
         void Reset()
         {
             events.Reset();
@@ -2605,18 +2588,18 @@ public:
             events.ScheduleEvent(EVENT_SPELL_REFLECT, 25000);
             events.ScheduleEvent(EVENT_SUNDER_ARMOR, 15000);
         }
-  
+
         void MoveInLineOfSight(Unit* who)
         {
             if (!instance)
                 return;
-  
+
             if (instance->GetData(DATA_TEAM_IN_INSTANCE) != HORDE)
                 return;
-  
+
             if (who->GetTypeId() != TYPEID_PLAYER)
                 return;
-  
+
             if (me->IsWithinDistInMap(who, 25.0f))
             {
                 if (instance->GetData(DATA_FIRST_SQUAD_STATE) == DONE && instance->GetData(DATA_SECOND_SQUAD_STATE) != DONE)
@@ -2627,17 +2610,17 @@ public:
                 }
             }
         }
-  
+
         void UpdateAI(const uint32 diff)
         {
             if (!instance)
                 return;
-  
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-  
+
             events.Update(diff);
-  
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -2682,34 +2665,34 @@ public:
                     break;
                 }
             }
-  
+
             DoMeleeAttackIfReady();
         }
-  
+
     private:
         EventMap events;
         InstanceScript* instance;
     };
-  
+
     CreatureAI* GetAI(Creature* pCreature) const
     {
         return new npc_korkron_defenderAI(pCreature);
     }
-  };
-  
+};
+
 /* Skybreaker Vindicator  37003*/
 class npc_skybreaker_vindicator: public CreatureScript
-  {
+{
 public:
     npc_skybreaker_vindicator() : CreatureScript("npc_skybreaker_vindicator") { }
-  
+
     struct npc_skybreaker_vindicatorAI : public ScriptedAI
     {
         npc_skybreaker_vindicatorAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
         }
-  
+
         void Reset()
         {
             _started = instance->GetBossState(DATA_GUNSHIP_EVENT) == DONE;
@@ -2718,21 +2701,21 @@ public:
             events.ScheduleEvent(EVENT_CONCENTRATION, 20000); // TODO: Fix the timers
             events.ScheduleEvent(EVENT_HOLY_WRATH, 20000); // TODO: Fix the timers
         }
-  
+
         void MoveInLineOfSight(Unit* who)
         {
             if (!instance)
                 return;
-  
+
             if (instance->GetData(DATA_TEAM_IN_INSTANCE) != ALLIANCE)
                 return;
-  
+
             if (who->GetTypeId() != TYPEID_PLAYER)
                 return;
-  
+
             if (instance->GetData(DATA_FIRST_SQUAD_STATE) == DONE)
                 return;
-  
+
             if (!_started && me->IsWithinDistInMap(who, 25.0f))
             {
                 _started = true;
@@ -2740,21 +2723,21 @@ public:
                 events.ScheduleEvent(EVENT_FIRST_SQUAD_ASSISTED_2, 15000); // TODO : fix the timer
             }
         }
-  
+
         void UpdateAI(const uint32 diff)
-          {
+        {
             if (!instance)
                 return;
-  
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-  
+
             events.Update(diff);
-  
+
             while (uint32 eventId = events.ExecuteEvent())
-              {
+            {
                 switch (eventId)
-                  {
+                {
                 case EVENT_FIRST_SQUAD_ASSISTED_1:
                     Talk(SAY_FIRST_SQUAD_RESCUED_ALLIANCE_0);
                     break;
@@ -2785,11 +2768,11 @@ public:
                             DoCast(target, SPELL_HOLY_WRATH);
                     events.ScheduleEvent(EVENT_HOLY_WRATH, 15000);
                     break;
-                  }
+                }
             }
-  
+
             DoMeleeAttackIfReady();
-          }
+        }
 
     private:
         bool _started;
@@ -2801,21 +2784,21 @@ public:
     {
         return new npc_skybreaker_vindicatorAI(pCreature);
     }
-  };
-  
+};
+
 /* Skybreaker Protector  36998*/
 class npc_skybreaker_protector: public CreatureScript
-  {
+{
 public:
     npc_skybreaker_protector() : CreatureScript("npc_skybreaker_protector") { }
-  
+
     struct npc_skybreaker_protectorAI : public ScriptedAI
     {
         npc_skybreaker_protectorAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
         }
-  
+
         void Reset()
         {
             events.Reset();
@@ -2824,18 +2807,18 @@ public:
             events.ScheduleEvent(EVENT_SPELL_REFLECT, 25000);
             events.ScheduleEvent(EVENT_SUNDER_ARMOR, 15000);
         }
-  
+
         void MoveInLineOfSight(Unit* who)
         {
             if (!instance)
                 return;
-  
+
             if (instance->GetData(DATA_TEAM_IN_INSTANCE) != ALLIANCE)
                 return;
-  
+
             if (who->GetTypeId() != TYPEID_PLAYER)
                 return;
-  
+
             if (me->IsWithinDistInMap(who, 25.0f))
             {
                 if (instance->GetData(DATA_FIRST_SQUAD_STATE) == DONE && instance->GetData(DATA_SECOND_SQUAD_STATE) != DONE)
@@ -2847,17 +2830,17 @@ public:
                 }
             }
         }
-  
+
         void UpdateAI(const uint32 diff)
-          {
+        {
             if (!instance)
                 return;
-  
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-  
+
             events.Update(diff);
-  
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -2905,10 +2888,10 @@ public:
                     break;
                 }
             }
-  
+
             DoMeleeAttackIfReady();
         }
-  
+
     private:
         EventMap events;
         InstanceScript* instance;
@@ -2918,44 +2901,44 @@ public:
         return new npc_skybreaker_protectorAI(pCreature);
     }
 };
-  
-  
+
+
 /* Spire Frostwyrm  37230*/
 class npc_icc_spire_frostwyrm: public CreatureScript
 {
 public:
     npc_icc_spire_frostwyrm() : CreatureScript("npc_icc_spire_frostwyrm") { }
-  
+
     struct npc_icc_spire_frostwyrmAI : public ScriptedAI
     {
         npc_icc_spire_frostwyrmAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
         }
-  
+
         void Reset()
-          {
+        {
             landed = false;
             events.Reset();
-            me->SetFlying(true);
+            me->SetCanFly(true);
             me->SetReactState(REACT_AGGRESSIVE);
-            me->AddUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+            me->AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
             events.ScheduleEvent(EVENT_FROST_BREATH, 20000);
             events.ScheduleEvent(EVENT_BLIZZARD, 25000);
             events.ScheduleEvent(EVENT_CLEAVE, 10000);
-          }
-  
+        }
+
         void MoveInLineOfSight(Unit* who)
         {
             if (!instance)
                 return;
-  
+
             if (who->GetTypeId() != TYPEID_PLAYER)
                 return;
-  
+
             if (!who->isTargetableForAttack())
                 return;
-  
+
             if (!landed && me->IsWithinDistInMap(who, 35.0f))
             {
                 if (instance->GetData(DATA_TEAM_IN_INSTANCE) == HORDE)
@@ -2963,24 +2946,24 @@ public:
                 else
                     Talk(SAY_FROSTWYRM_LAND_A_1);
                 landed = true;
-                me->SetFlying(false);
-                me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
+                me->SetCanFly(false);
+                me->RemoveUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
                 me->SetInCombatWith(who);
                 me->AddThreat(who, 1.0f);
                 me->GetMotionMaster()->MoveChase(who);
             }
         }
-  
+
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
-  
-            if (me->HasUnitState(UNIT_STAT_CASTING))
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-  
+
             events.Update(diff);
-  
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -3002,9 +2985,9 @@ public:
                     break;
                 }
             }
-  
+
             DoMeleeAttackIfReady();
-          }
+        }
 
     private:
         bool landed;
@@ -3016,14 +2999,14 @@ public:
     {
         return new npc_icc_spire_frostwyrmAI(pCreature);
     }
-  };
-  
+};
+
 /* ---------------------------------- AreaTrigger Scripts ------------------------------------- */
 class at_icc_land_frostwyrm : public AreaTriggerScript
-  {
+{
 public:
     at_icc_land_frostwyrm() : AreaTriggerScript("at_icc_land_frostwyrm") { }
-  
+
     bool OnTrigger(Player* player, AreaTriggerEntry const* areaTrigger)
     {
         if (InstanceScript* instance = player->GetInstanceScript())
@@ -3034,15 +3017,15 @@ public:
                     player->GetMap()->SummonCreature(NPC_SPIRE_FROSTWYRM, FrostWyrmPosA);
                 else
                     player->GetMap()->SummonCreature(NPC_SPIRE_FROSTWYRM, FrostWyrmPosH);
-  
+
                 instance->SetData(DATA_SPIRE_FROSTWYRM_STATE, IN_PROGRESS);
             }
         }
-  
+
         return true;
     }
 };
-  
+
 /* transport script */
 class transport_gunship : public TransportScript
 {
@@ -3052,14 +3035,14 @@ public:
     void OnRelocate(Transport* transport, uint32 waypointId, uint32 mapId, float x, float y, float z)
     {
     }
-  
+
     void OnAddPassenger(Transport* transport, Player* player)
     {
         if (!transport || !player)
             return;
-  
+
         switch (transport->GetEntry())
-          {
+        {
         case GO_THE_SKYBREAKER_ALLIANCE_ICC:
             player->AddAura(SPELL_ON_SKYBREAKERS_DECK, player);
             break;
@@ -3068,7 +3051,7 @@ public:
             break;
         default:
             break;
-          }
+        }
     }
 
     void OnRemovePassenger(Transport* /*transport*/, Player* player)
@@ -3079,84 +3062,84 @@ public:
         player->RemoveAurasDueToSpell(SPELL_ON_ORGRIMS_HAMMERS_DECK);
         player->RemoveAurasDueToSpell(SPELL_ON_SKYBREAKERS_DECK);
     }
-  };
-  
+};
+
 /* Remove Rocket Pack - 70713 */
 class spell_icc_remove_rocket_pack : public SpellScriptLoader
-  {
+{
 public:
     spell_icc_remove_rocket_pack() : SpellScriptLoader("spell_icc_remove_rocket_pack") { }
-  
+
     class spell_icc_remove_rocket_pack_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_icc_remove_rocket_pack_SpellScript);
-  
+
         void HandleEffect(SpellEffIndex /*effIndex*/)
         {
             Player* hitPlr = GetHitPlayer();
             if (!hitPlr) // If player is offline
                 return;
-  
+
             int32 itemId = GetEffectValue();
             uint32 itemCount = hitPlr->GetItemCount(itemId, false); // Should be 1, but just in case.
             hitPlr->DestroyItemCount(itemId, itemCount, true, false);
         }
-  
+
         void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_icc_remove_rocket_pack_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
-  
+
     SpellScript* GetSpellScript() const
     {
         return new spell_icc_remove_rocket_pack_SpellScript();
     }
 };
-  
+
 /* spell 69471 Heat Drain */
 class spell_gb_heat_drain : public SpellScriptLoader
 {
 public:
     spell_gb_heat_drain() : SpellScriptLoader("spell_gb_heat_drain") { }
-  
+
     class spell_gb_heat_drain_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_gb_heat_drain_SpellScript);
-  
+
         void HandleDummy(SpellEffIndex /*effIndex*/)
-          {
+        {
             Unit* caster = GetCaster();
-  
+
             if (caster->GetPower(POWER_ENERGY) != 0)
                 caster->ModifyPower(POWER_ENERGY, -1);
-  
+
             if (caster->GetPower(POWER_ENERGY) >= 99)
                 caster->CastSpell(caster, SPELL_OVERHEAT, true);
         }
-  
+
         void Register()
         {
             OnEffectHit += SpellEffectFn(spell_gb_heat_drain_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
-  
+
     SpellScript* GetSpellScript() const
     {
         return new spell_gb_heat_drain_SpellScript();
     }
 };
-  
+
 /* spell 69488 Overheat Drain */
 class spell_gb_overheat_drain : public SpellScriptLoader
 {
 public:
     spell_gb_overheat_drain() : SpellScriptLoader("spell_gb_overheat_drain") { }
-  
+
     class spell_gb_overheat_drain_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_gb_overheat_drain_SpellScript);
-  
+
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             Unit* caster = GetCaster();
@@ -3164,61 +3147,61 @@ public:
             if (caster->GetPower(POWER_ENERGY) >= 10)
                 caster->ModifyPower(POWER_ENERGY, -10);
         }
-  
+
         void Register()
-          {
+        {
             OnEffectHit += SpellEffectFn(spell_gb_overheat_drain_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-          }
+        }
     };
 
     SpellScript* GetSpellScript() const
     {
         return new spell_gb_overheat_drain_SpellScript();
     }
-  };
-  
+};
+
 /* spell 69402 Incinerating Blast */
 class spell_gb_incinerating_blast : public SpellScriptLoader
-  {
+{
 public:
     spell_gb_incinerating_blast() : SpellScriptLoader("spell_gb_incinerating_blast") { }
-  
+
     class spell_gb_incinerating_blast_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_gb_incinerating_blast_SpellScript);
-  
+
         void AddExtraDamage()
         {
             Unit* caster = GetCaster();
             if (!caster || !caster->GetPower(POWER_ENERGY))
                 return;
-  
-            SetHitDamage(int32(GetHitDamage() (caster->GetPower(POWER_ENERGY) * 100.0f))); // TODO: How much should be?
+
+            SetHitDamage(int32(GetHitDamage() + (caster->GetPower(POWER_ENERGY) * 100.0f))); // TODO: How much should be?
             caster->SetPower(POWER_ENERGY, 0);
         }
-  
+
         void Register()
         {
             OnHit += SpellHitFn(spell_gb_incinerating_blast_SpellScript::AddExtraDamage);
-          }
+        }
     };
-  
+
     SpellScript* GetSpellScript() const
     {
         return new spell_gb_incinerating_blast_SpellScript();
     }
 };
-  
+
 /* spell 71335, 70339 Burning Pitch */
 class spell_gb_burning_pitch : public SpellScriptLoader
-  {
+{
 public:
     spell_gb_burning_pitch() : SpellScriptLoader("spell_gb_burning_pitch") { }
-  
+
     class spell_gb_burning_pitch_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_gb_burning_pitch_SpellScript);
-  
+
         bool Validate(SpellInfo const* /*spellInfo*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_BURNING_PITCH_SIEGE_DMG_A))
@@ -3229,54 +3212,54 @@ public:
                 return false;
             return true;
         }
-  
+
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             Unit* caster = GetCaster();
             Unit* target = GetHitUnit();
-  
+
             if (!caster || !target)
                 return;
-  
+
             if (GetSpellInfo()->Id == SPELL_BURNING_PITCH_A)
                 caster->CastSpell(target, SPELL_BURNING_PITCH_SIEGE_DMG_A, true);
             else
                 caster->CastSpell(target, SPELL_BURNING_PITCH_SIEGE_DMG_H, true);
-  
+
             caster->CastSpell(target, SPELL_BURNING_PITCH_AOE_DAMAGE, true);
         }
-  
+
         void Register()
-          {
+        {
             OnEffectHitTarget += SpellEffectFn(spell_gb_burning_pitch_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-          }
+        }
     };
 
     SpellScript* GetSpellScript() const
     {
         return new spell_gb_burning_pitch_SpellScript();
     }
-  };
-  
+};
+
 /* spell 68645 Rocket Pack */
 class spell_rocket_pack : public SpellScriptLoader
-  {
+{
 public:
     spell_rocket_pack() : SpellScriptLoader("spell_rocket_pack") { }
-  
+
     class spell_rocket_pack_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_rocket_pack_AuraScript);
-  
+
         void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             GetTarget()->CastSpell(GetTarget(), 68721, true);
         }
-  
+
         void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             GetTarget()->RemoveAurasDueToSpell(68721);
-          }
+        }
 
         void Register()
         {
@@ -3289,10 +3272,10 @@ public:
     {
         return new spell_rocket_pack_AuraScript();
     }
-  };
-  
-  void AddSC_boss_gunship_battle()
-  {
+};
+
+void AddSC_boss_gunship_battle()
+{
     new npc_muradin_gunship();
     new npc_saurfang_gunship();
     new npc_zafod_boombox();
@@ -3319,4 +3302,4 @@ public:
     new spell_gb_incinerating_blast();
     new spell_gb_burning_pitch();
     new spell_rocket_pack();
-  }
+}
