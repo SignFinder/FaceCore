@@ -484,6 +484,8 @@ class PetAura
         int32 damage;
 };
 typedef std::map<uint32, PetAura> SpellPetAuraMap;
+typedef std::vector<PetAura> PetPassiveAuraList;
+typedef std::map<uint32, PetPassiveAuraList> SpellPetPassiveAuraMap;
 
 struct SpellArea
 {
@@ -678,6 +680,15 @@ class SpellMgr
         PetLevelupSpellSet const* GetPetLevelupSpellList(uint32 petFamily) const;
         PetDefaultSpellsEntry const* GetPetDefaultSpellsEntry(int32 id) const;
 
+        PetPassiveAuraList const* GetPetPassiveAuraList(uint32 creature_id)
+        {
+            SpellPetPassiveAuraMap::const_iterator itr = mSpellPetPassiveAuraMap.find(creature_id);
+            if (itr != mSpellPetPassiveAuraMap.end())
+                return &itr->second;
+            else
+                return NULL;
+        }
+
         // Spell area
         SpellAreaMapBounds GetSpellAreaMapBounds(uint32 spell_id) const;
         SpellAreaForQuestMapBounds GetSpellAreaForQuestMapBounds(uint32 quest_id, bool active) const;
@@ -734,6 +745,7 @@ class SpellMgr
         SpellBonusMap              mSpellBonusMap;
         SpellThreatMap             mSpellThreatMap;
         SpellPetAuraMap            mSpellPetAuraMap;
+        SpellPetPassiveAuraMap     mSpellPetPassiveAuraMap;
         SpellLinkedMap             mSpellLinkedMap;
         SpellEnchantProcEventMap   mSpellEnchantProcEventMap;
         EnchantCustomAttribute     mEnchantCustomAttr;

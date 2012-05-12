@@ -184,8 +184,7 @@ void Vehicle::ApplyAllImmunities()
         case 452: // Gunship Cannon Aliance
         case 453: // Gunship Cannon Horde
         case 554: // ICC Gunship Cannon
-            _me->SetControlled(true, UNIT_STAT_ROOT);
-			_me->SetControlled(false, UNIT_STAT_ROOT);
+            _me->SetControlled(true, UNIT_STATE_ROOT);
             break;
         default:
             break;
