@@ -1737,6 +1737,9 @@ class Unit : public WorldObject
         }
         bool isPossessing(Unit* u) const { return u->isPossessed() && GetCharmGUID() == u->GetGUID(); }
 
+        template<typename Func>
+        void CallForAllGuardians(Func const& func);
+
         CharmInfo* GetCharmInfo() { return m_charmInfo; }
         CharmInfo* InitCharmInfo();
         void DeleteCharmInfo();
@@ -2416,5 +2419,18 @@ namespace Trinity
         private:
             const bool m_ascending;
     };
+}
+
+template<typename Func>
+void Unit::CallForAllGuardians(Func const& func)
+{
+    for (Unit::ControlList::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
+    {
+        Unit* unit = *itr;
+        ++itr;
+
+        if (unit->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+            func(unit);
+    }
 }
 #endif

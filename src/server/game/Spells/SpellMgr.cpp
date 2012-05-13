@@ -2060,6 +2060,14 @@ void SpellMgr::LoadSpellPetAuras()
         uint32 pet = fields[2].GetUInt32();
         uint32 aura = fields[3].GetUInt32();
 
+        if (!spell)
+        {
+            // Creating lists of pet passive auras (spell == 0)
+            PetAura pa(pet, aura, eff, 0);
+            mSpellPetPassiveAuraMap[pet].push_back(pa);
+            continue;
+        }
+
         SpellPetAuraMap::iterator itr = mSpellPetAuraMap.find((spell<<8) + eff);
         if (itr != mSpellPetAuraMap.end())
             itr->second.AddAura(pet, aura);
@@ -3107,6 +3115,11 @@ void SpellMgr::LoadDbcDataCorrections()
             case 66588: // Flaming Spear
             case 54171: // Divine Storm
                 spellInfo->MaxAffectedTargets = 3;
+                break;
+            case 68645: // Rocket Pack! Hack untill movejump will be implemented properly
+                spellInfo->Effect[0] = SPELL_EFFECT_KNOCK_BACK_DEST;
+                spellInfo->EffectMiscValue[0] = -250;
+                spellInfo->EffectBasePoints[0] = 150;
                 break;
             case 38310: // Multi-Shot
             case 53385: // Divine Storm (Damage)

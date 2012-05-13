@@ -185,6 +185,11 @@ class Pet : public Guardian
         void CastPetAura(PetAura const* aura);
         bool IsPetAura(Aura const* aura);
 
+        void RegenerateHealth(uint32 diff);
+        float OCTRegenHPPerSpirit();
+        float OCTRegenMPPerSpirit();
+        void ApplyHappinessBonus(bool apply);
+
         void _LoadSpellCooldowns();
         void _SaveSpellCooldowns(SQLTransaction& trans);
         void _LoadAuras(uint32 timediff);
@@ -219,6 +224,8 @@ class Pet : public Guardian
         void SetAuraUpdateMaskForRaid(uint8 slot) { m_auraRaidUpdateMask |= (uint64(1) << slot); }
         void ResetAuraUpdateMaskForRaid() { m_auraRaidUpdateMask = 0; }
 
+        bool IsInWorld() const { return ( !m_loading && !m_removed && Object::IsInWorld()); }
+
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
 
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
@@ -232,6 +239,7 @@ class Pet : public Guardian
         uint64  m_auraRaidUpdateMask;
         bool    m_loading;
         uint32  m_regenTimer;
+        uint8   m_HappinessState;
 
         DeclinedName *m_declinedname;
 
@@ -244,5 +252,16 @@ class Pet : public Guardian
         {
             ASSERT(false);
         }
+};
+
+struct ApplyScalingBonusWithHelper
+{
+    explicit ApplyScalingBonusWithHelper(ScalingTarget _target, uint32 _stat, bool _apply ) :
+                                         target(_target), stat(_stat), apply(_apply)
+    {}
+    void operator()(Unit* unit) const;
+    ScalingTarget target;
+    uint32 stat;
+    bool apply;
 };
 #endif

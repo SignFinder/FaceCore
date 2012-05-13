@@ -131,22 +131,46 @@ public:
 
         if (chr->GetTransport())
         {
-            uint32 tguid = chr->GetTransport()->AddNPCPassenger(0, id, chr->GetTransOffsetX(), chr->GetTransOffsetY(), chr->GetTransOffsetZ(), chr->GetTransOffsetO());
-            if (tguid > 0)
+            Creature* creature;
+
+            if (!map->ToInstanceMap())
             {
-                PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_INS_CREATURE_TRANSPORT);
+                if (creature = chr->GetTransport()->AddNPCPassenger(0, id, chr->GetTransOffsetX(), chr->GetTransOffsetY(), chr->GetTransOffsetZ(), chr->GetTransOffsetO()))
+                {
+                    uint32 tguid = creature->GetGUID();
 
-                stmt->setInt32(0, int32(tguid));
-                stmt->setInt32(1, int32(id));
-                stmt->setInt32(2, int32(chr->GetTransport()->GetEntry()));
-                stmt->setFloat(3, chr->GetTransOffsetX());
-                stmt->setFloat(4, chr->GetTransOffsetY());
-                stmt->setFloat(5, chr->GetTransOffsetZ());
-                stmt->setFloat(6, chr->GetTransOffsetO());
+                    PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_INS_CREATURE_TRANSPORT);
 
-                WorldDatabase.Execute(stmt);
+                    stmt->setInt32(0, int32(tguid));
+                    stmt->setInt32(1, int32(id));
+                    stmt->setInt32(2, int32(chr->GetTransport()->GetEntry()));
+                    stmt->setFloat(3, chr->GetTransOffsetX());
+                    stmt->setFloat(4, chr->GetTransOffsetY());
+                    stmt->setFloat(5, chr->GetTransOffsetZ());
+                    stmt->setFloat(6, chr->GetTransOffsetO());
+
+                    WorldDatabase.Execute(stmt);
+                }
             }
+            else
+            {
+                if (creature = chr->GetTransport()->AddNPCPassengerInInstance(0, id, chr->GetTransOffsetX(), chr->GetTransOffsetY(), chr->GetTransOffsetZ(), chr->GetTransOffsetO()))
+                {
+                    uint32 tguid = creature->GetGUID();
 
+                    PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_INS_CREATURE_TRANSPORT);
+
+                    stmt->setInt32(0, int32(tguid));
+                    stmt->setInt32(1, int32(id));
+                    stmt->setInt32(2, int32(chr->GetTransport()->GetEntry()));
+                    stmt->setFloat(3, chr->GetTransOffsetX());
+                    stmt->setFloat(4, chr->GetTransOffsetY());
+                    stmt->setFloat(5, chr->GetTransOffsetZ());
+                    stmt->setFloat(6, chr->GetTransOffsetO());
+
+                    WorldDatabase.Execute(stmt);
+                }
+            }
             return true;
         }
 
