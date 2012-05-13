@@ -754,42 +754,42 @@ Creature* Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float 
 Creature* Transport::AddNPCPassengerInInstance(uint32 entry, float x, float y, float z, float o, uint32 anim)
 {
     Map* map = GetMap();
-    Creature* ñreature = new Creature;
+    Creature* creature = new Creature;
 
-    if (!ñreature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, GetPhaseMask(), entry, 0, GetGOInfo()->faction, 0, 0, 0, 0))
+    if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, GetPhaseMask(), entry, 0, GetGOInfo()->faction, 0, 0, 0, 0))
     {
-        delete ñreature;
+        delete creature;
         return NULL;
     }
 	
-    ñreature->SetTransport(this);
-    ñreature->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
-    ñreature->m_movementInfo.guid = GetGUID();
-    ñreature->m_movementInfo.t_pos.Relocate(x, y, z, o);
+    creature->SetTransport(this);
+    creature->AddUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT);
+    creature->m_movementInfo.guid = GetGUID();
+    creature->m_movementInfo.t_pos.Relocate(x, y, z, o);
     o += GetOrientation();
     MapManager::NormalizeOrientation(o);
 
-    ñreature->Relocate(
+    creature->Relocate(
         GetPositionX() + (x * cos(GetOrientation()) + y * sin(GetOrientation() + float(M_PI))),
         GetPositionY() + (y * cos(GetOrientation()) + x * sin(GetOrientation())),
         z + GetPositionZ() ,
         o);
 
-    ñreature->SetHomePosition(ñreature->GetPositionX(), ñreature->GetPositionY(), ñreature->GetPositionZ(), ñreature->GetOrientation());
+    creature->SetHomePosition(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation());
 
-    if (!ñreature->IsPositionValid())
+    if (!creature->IsPositionValid())
     {
-        sLog->outError("Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)", ñreature->GetGUIDLow(), ñreature->GetEntry(), ñreature->GetPositionX(), ñreature->GetPositionY());
-        delete ñreature;
+        sLog->outError("Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)", creature->GetGUIDLow(), creature->GetEntry(), creature->GetPositionX(), creature->GetPositionY());
+        delete creature;
         return NULL;
     }
 
-    map->AddToMap(ñreature);
-    m_NPCPassengerSet.insert(ñreature);
+    map->AddToMap(creature);
+    m_NPCPassengerSet.insert(creature);
 
-    ñreature->setActive(true);
-    sScriptMgr->OnAddCreaturePassenger(this, ñreature);
-    return ñreature;
+    creature->setActive(true);
+    sScriptMgr->OnAddCreaturePassenger(this, creature);
+    return creature;
 }
 
 void Transport::UpdatePosition(MovementInfo* mi)
