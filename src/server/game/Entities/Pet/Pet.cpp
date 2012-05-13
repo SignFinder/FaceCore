@@ -676,6 +676,14 @@ void Creature::Regenerate(Powers power)
             addvalue = 20;
             break;
         }
+        /*case POWER_HAPPINESS:
+        {
+            addvalue = -178.0f;                                   //value is 70/35/17/8/4 (per min) * 1000 / 8 (timer 2 secs)
+            if (isInCombat())                                     //we know in combat happiness fades faster, multiplier guess
+                addvalue = addvalue * 1.5f;
+            ApplyHappinessBonus(true);
+            break;
+        }*/
         default:
             return;
     }
@@ -1158,8 +1166,17 @@ void Pet::_SaveSpellCooldowns(SQLTransaction& trans)
 
 void Pet::_LoadSpells()
 {
+    uint8 spec = 0;
+    if (getPetType() == HUNTER_PET)
+    {
+        Unit* owner = GetOwner();
+        if(owner && owner->GetTypeId() == TYPEID_PLAYER)
+            spec = ((Player*)owner)->GetActiveSpec();
+    }
+
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_SPELL);
     stmt->setUInt32(0, m_charmInfo->GetPetNumber());
+    stmt->setUInt32(1, spec);
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
     if (result)
@@ -1176,6 +1193,14 @@ void Pet::_LoadSpells()
 
 void Pet::_SaveSpells(SQLTransaction& trans)
 {
+    uint8 spec = 0;
+    if (getPetType() == HUNTER_PET)
+    {
+        Unit* owner = GetOwner();
+        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+            spec = ((Player*)owner)->GetActiveSpec();
+    }
+
     for (PetSpellMap::iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
     {
         ++next;
@@ -1192,6 +1217,7 @@ void Pet::_SaveSpells(SQLTransaction& trans)
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_PET_SPELL_BY_SPELL);
                 stmt->setUInt32(0, m_charmInfo->GetPetNumber());
                 stmt->setUInt32(1, itr->first);
+                stmt->setUInt32(2, spec);
                 trans->Append(stmt);
 
                 m_spells.erase(itr);
@@ -1200,12 +1226,14 @@ void Pet::_SaveSpells(SQLTransaction& trans)
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_PET_SPELL_BY_SPELL);
                 stmt->setUInt32(0, m_charmInfo->GetPetNumber());
                 stmt->setUInt32(1, itr->first);
+                stmt->setUInt32(2, spec);
                 trans->Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_PET_SPELL);
                 stmt->setUInt32(0, m_charmInfo->GetPetNumber());
                 stmt->setUInt32(1, itr->first);
                 stmt->setUInt8(2, itr->second.active);
+                stmt->setUInt32(3, spec);
                 trans->Append(stmt);
 
                 break;
@@ -1214,6 +1242,7 @@ void Pet::_SaveSpells(SQLTransaction& trans)
                 stmt->setUInt32(0, m_charmInfo->GetPetNumber());
                 stmt->setUInt32(1, itr->first);
                 stmt->setUInt8(2, itr->second.active);
+                stmt->setUInt32(3, spec);
                 trans->Append(stmt);
                 break;
             case PETSPELL_UNCHANGED:
@@ -1881,6 +1910,8 @@ bool Pet::IsPermanentPetFor(Player* owner)
                     return GetCreatureTemplate()->type == CREATURE_TYPE_DEMON;
                 case CLASS_DEATH_KNIGHT:
                     return GetCreatureTemplate()->type == CREATURE_TYPE_UNDEAD;
+                case CLASS_MAGE:
+                    return GetCreatureTemplate()->Entry == 37994;
                 default:
                     return false;
             }
@@ -2022,7 +2053,7 @@ void Pet::SynchronizeLevelWithOwner()
     }
 }
 
-/*void pet::RegenerateHealth(uint32 diff)
+void Pet::RegenerateHealth(uint32 diff)
 {
     uint32 curValue = GetHealth();
     uint32 maxValue = GetMaxHealth();
@@ -2042,11 +2073,24 @@ void Pet::SynchronizeLevelWithOwner()
         addvalue = OCTRegenHPPerSpirit() * HealthIncreaseRate;
         if (!isInCombat())
         {
-            AuraList const& mModHealthRegenPct = GetAurasByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
-            for(AuraList::const_iterator i = mModHealthRegenPct.begin(); i != mModHealthRegenPct.end(); ++i)
-                addvalue *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+            uint32 amount = 0;
+            Unit::AuraEffectList const& mModHealthRegenPct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
+            for (Unit::AuraEffectList::const_iterator itr = mModHealthRegenPct.begin(); itr != mModHealthRegenPct.end(); ++itr)
+            {
+                SpellInfo const *spellproto = (*itr)->GetSpellInfo();
+
+                if (!spellproto)
+                    continue;
+            
+                if (spellproto->AttributesEx4 & SPELL_ATTR4_IS_PET_SCALING)
+                {
+                    amount = (*itr)->GetAmount();
+                    break;
+                }
+            }
+            addvalue *= (100.0f + amount) / 100.0f;
         }
-        else if(HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
+        else if (HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
             addvalue *= GetTotalAuraModifier(SPELL_AURA_MOD_REGEN_DURING_COMBAT) / 100.0f;
     }
     // always regeneration bonus (including combat)
@@ -2055,7 +2099,7 @@ void Pet::SynchronizeLevelWithOwner()
     if(addvalue < 0)
         addvalue = 0;
 
-    addvalue *= (float)diff / REGEN_TIME_FULL;
+    addvalue *= (float)diff / 2000; //REGEN_TIME_FULL;
 
     ModifyHealth(int32(addvalue));
 }
@@ -2099,4 +2143,53 @@ void Pet::ApplyHappinessBonus(bool apply)
         UpdateDamagePhysical(RANGED_ATTACK);
         UpdateSpellPower();
     }
-}*/
+}
+
+float Pet::OCTRegenHPPerSpirit()
+{
+    Unit* owner = GetOwner();
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+        return ( GetPower(POWER_MANA) > 0 ) ? (GetStat(STAT_SPIRIT) * 0.25f) : (GetStat(STAT_SPIRIT) * 0.80f);
+
+    uint32 level = ((Player*)owner)->getLevel();
+    uint32 pclass = ((Player*)owner)->getClass();
+
+    if (level > GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+
+    GtOCTRegenHPEntry     const *baseRatio = sGtOCTRegenHPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+    GtRegenHPPerSptEntry  const *moreRatio = sGtRegenHPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+
+    if (baseRatio == NULL || moreRatio == NULL)
+        return 0.0f;
+
+    // Formula from PaperDollFrame script
+    float spirit = GetStat(STAT_SPIRIT);
+    float baseSpirit = spirit;
+    if (baseSpirit > 50) baseSpirit = 50;
+    float moreSpirit = spirit - baseSpirit;
+    float regen = baseSpirit * baseRatio->ratio + moreSpirit * moreRatio->ratio;
+    return regen;
+}
+
+float Pet::OCTRegenMPPerSpirit()
+{
+    Unit* owner = GetOwner();
+
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+        return ((GetStat(STAT_SPIRIT) / 5.0f + 17.0f)/sqrt(GetStat(STAT_INTELLECT)));
+
+    uint32 level = ((Player*)owner)->getLevel();
+    uint32 pclass = ((Player*)owner)->getClass();
+
+    if (level > GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+
+    GtRegenMPPerSptEntry  const *moreRatio = sGtRegenMPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+
+    if (moreRatio == NULL)
+        return 0.0f;
+
+    // Formula get from PaperDollFrame script
+    float spirit    = GetStat(STAT_SPIRIT);
+    float regen     = spirit * moreRatio->ratio;
+    return regen;
+}

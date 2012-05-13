@@ -73,6 +73,7 @@ enum ScalingTarget
     SCALING_TARGET_SPELLHIT,
     SCALING_TARGET_EXPERTIZE,
     SCALING_TARGET_POWERREGEN,
+    SCALING_TARGET_ATTACKSPEED,
     SCALING_TARGET_MAX
 };
 
@@ -123,6 +124,7 @@ class Guardian : public Minion
         void ApplySpellHitScalingBonus(bool apply);
         void ApplyExpertizeScalingBonus(bool apply);
         void ApplyPowerregenScalingBonus(bool apply);
+        void ApplyAttackSpeedScalingBonus(bool apply);
         PetScalingData* CalculateScalingData( bool recalculate = false );
         void AddScalingAction(ScalingTarget target, uint32 stat, bool apply);
 

@@ -1078,7 +1078,6 @@ bool Guardian::UpdateStats(Stats stat)
 
     // value = ((create_value + base_value * base_pct) + total_value) * total_pct
     float value  = GetTotalStatValue(stat);
-
     SetStat(stat, int32(value));
 
     switch (stat)
@@ -1114,6 +1113,11 @@ bool Guardian::UpdateAllStats()
 
     for (uint8 i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
         UpdateResistances(i);
+		
+    UpdateAttackPowerAndDamage();
+    UpdateAttackPowerAndDamage(true);
+    UpdateManaRegen();
+    UpdateSpellPower();
 
     return true;
 }
@@ -1134,7 +1138,7 @@ void Guardian::UpdateArmor()
     float value = 0.0f;
     UnitMods unitMod = UNIT_MOD_ARMOR;
 
-    value = GetModifierValue(unitMod, BASE_VALUE) + GetStat(STAT_AGILITY) * 2.0f;
+    value  = GetModifierValue(unitMod, BASE_VALUE) + GetStat(STAT_AGILITY) * 2.0f;
     value *= GetModifierValue(unitMod, BASE_PCT);
     value += GetModifierValue(unitMod, TOTAL_VALUE);
     value *= GetModifierValue(unitMod, TOTAL_PCT);
@@ -1144,10 +1148,13 @@ void Guardian::UpdateArmor()
 
 void Guardian::UpdateMaxHealth()
 {
+    if (!CanModifyStats())
+        return;
+
     UnitMods unitMod = UNIT_MOD_HEALTH;
     float staminaBonus = (GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA)) * (CalculateScalingData()->healthScale / 100.0f);
 
-    float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth() + staminaBonus;
+    float value   = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth() + staminaBonus;
     value  *= GetModifierValue(unitMod, BASE_PCT);
     value  += GetModifierValue(unitMod, TOTAL_VALUE);
     value  *= GetModifierValue(unitMod, TOTAL_PCT);
@@ -1157,6 +1164,9 @@ void Guardian::UpdateMaxHealth()
 
 void Guardian::UpdateMaxPower(Powers power)
 {
+    if (!CanModifyStats())
+        return;
+
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
 
     float intellectBonus = (power == POWER_MANA) ? (GetStat(STAT_INTELLECT) - GetCreateStat(STAT_INTELLECT))*(CalculateScalingData()->powerScale / 100.0f) : 0.0f;
@@ -1238,7 +1248,7 @@ void Guardian::UpdateDamagePhysical(WeaponAttackType attType)
 
     float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct;
     float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct;
-  
+
     // Pet's base damage changes depending on happiness
     // FIXME: it should be done through aura 8875 via basepoints change
     if (isHunterPet() && attType == BASE_ATTACK)
@@ -1277,9 +1287,11 @@ void Guardian::UpdateSpellPower()
 {
     Unit* owner = GetOwner();
 
-    if(!owner || owner->GetTypeId()!=TYPEID_PLAYER)
+    if(!owner ||owner->GetTypeId()!=TYPEID_PLAYER || !owner->IsInWorld())
         return;
-    // Only for displaying in client!
+
+    //MAPLOCK_READ(owner,MAP_LOCK_TYPE_AURAS);
+                                                  // Only for displaying in client!
     owner->SetUInt32Value(PLAYER_PET_SPELL_POWER, SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SPELL));
 }
 
@@ -1769,6 +1781,7 @@ void Guardian::ApplyAllScalingBonuses(bool apply)
     ApplySpellHitScalingBonus(apply);
     ApplyExpertizeScalingBonus(apply);
     ApplyPowerregenScalingBonus(apply);
+    ApplyAttackSpeedScalingBonus(apply);
 }
 
 void Guardian::ApplyHitScalingBonus(bool apply)
@@ -1893,6 +1906,47 @@ void Guardian::ApplyExpertizeScalingBonus(bool apply)
         }
     }
 
+}
+
+void Guardian::ApplyAttackSpeedScalingBonus(bool apply)
+{
+    Unit* owner = GetOwner();
+
+    // Don't apply scaling bonuses if no owner or owner is not player
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER || (ToPet() && ToPet()->m_removed))
+        return;
+
+    int32 m_attackspeed = int32((1.0f - owner->m_modAttackSpeedPct[BASE_ATTACK])*100.0f);
+
+    if (m_baseBonusData->attackspeedScale == m_attackspeed && !apply)
+        return;
+
+    m_baseBonusData->attackspeedScale = m_attackspeed;
+
+    int32 basePoints = int32((float)m_baseBonusData->attackspeedScale * float(CalculateScalingData()->attackspeedScale) / 100.0f);
+
+    bool needRecalculateStat = false;
+
+    if (basePoints == 0)
+        needRecalculateStat = true;
+
+    Unit::AuraEffectList const& scalingAuras = GetAuraEffectsByType(SPELL_AURA_MELEE_SLOW);
+    for (Unit::AuraEffectList::const_iterator itr = scalingAuras.begin(); itr != scalingAuras.end(); ++itr)
+    {
+        SpellInfo const *spellproto = (*itr)->GetSpellInfo();
+
+        if (!spellproto)
+            continue;
+
+        if (spellproto->AttributesEx4 & SPELL_ATTR4_IS_PET_SCALING)
+        {
+            SetCanModifyStats(false);
+            (*itr)->ChangeAmount(basePoints);
+            needRecalculateStat = true;
+            SetCanModifyStats(true);
+            break;
+        }
+    }
 }
 
 void Guardian::ApplyPowerregenScalingBonus(bool apply)
@@ -2041,6 +2095,9 @@ void Guardian::ApplyScalingBonus(ScalingAction* action)
             break;
         case SCALING_TARGET_POWERREGEN:
             ApplyPowerregenScalingBonus(action->apply);
+            break;
+        case SCALING_TARGET_ATTACKSPEED:
+            ApplyAttackSpeedScalingBonus(action->apply);
             break;
         case SCALING_TARGET_MAX:
         default:

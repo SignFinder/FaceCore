@@ -15122,6 +15122,8 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply
         ApplyPercentModFloatVar(m_modAttackSpeedPct[att], -val, apply);
         ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att, -val, apply);
     }
+    if (GetTypeId() == TYPEID_PLAYER && IsInWorld())
+        ((Player*)this)->CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_ATTACKSPEED, 0, false));
     m_attackTimer[att] = uint32(GetAttackTime(att) * m_modAttackSpeedPct[att] * remainingTimePct);
 }
 
