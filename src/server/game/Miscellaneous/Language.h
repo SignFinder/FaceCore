@@ -760,6 +760,14 @@ enum TrinityStrings
 
     LANG_CHANNEL_CITY                   = 819,
     // Room for in-game strings           820-999 not used
+    //Sherwood Forest BG
+    LANG_BG_SF_START_TWO_MINUTES        = 820,
+    LANG_BG_SF_START_ONE_MINUTE         = 821,
+    LANG_BG_SF_START_HALF_MINUTE        = 822,
+    LANG_BG_SF_HAS_BEGUN                = 823,
+    LANG_BG_SF_A_NEAR_VICTORY           = 824,
+    LANG_BG_SF_H_NEAR_VICTORY           = 825,
+
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,
