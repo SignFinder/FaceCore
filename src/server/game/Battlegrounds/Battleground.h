@@ -181,6 +181,7 @@ enum BattlegroundQueueTypeId
     BATTLEGROUND_QUEUE_2v2      = 8,
     BATTLEGROUND_QUEUE_3v3      = 9,
     BATTLEGROUND_QUEUE_5v5      = 10,
+    BATTLEGROUND_QUEUE_1v1      = 13,
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 
@@ -218,7 +219,8 @@ enum ScoreType
 
 enum ArenaType
 {
-    ARENA_TYPE_2v2          = 2,
+    ARENA_TYPE_1v1          = 1,
+	ARENA_TYPE_2v2          = 2,
     ARENA_TYPE_3v3          = 3,
     ARENA_TYPE_5v5          = 5
 };
@@ -631,7 +633,7 @@ class Battleground
         int32 m_EndTime;                                    // it is set to 120000 when bg is ending and it decreases itself
         uint32 m_LastResurrectTime;
         BattlegroundBracketId m_BracketId;
-        uint8  m_ArenaType;                                 // 2=2v2, 3=3v3, 5=5v5
+        uint8  m_ArenaType;                                 // 1=1v1, 2=2v2, 3=3v3, 5=5v5
         bool   m_InBGFreeSlotQueue;                         // used to make sure that BG is only once inserted into the BattlegroundMgr.BGFreeSlotQueue[bgTypeId] deque
         bool   m_SetDeleteThis;                             // used for safe deletion of the bg after end / all players leave
         bool   m_IsArena;
