@@ -136,7 +136,6 @@ enum ChatRestrictionType
 enum CharterTypes
 {
     GUILD_CHARTER_TYPE                            = 9,
-    ARENA_TEAM_CHARTER_1v1_TYPE                   = 1,
     ARENA_TEAM_CHARTER_2v2_TYPE                   = 2,
     ARENA_TEAM_CHARTER_3v3_TYPE                   = 3,
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5

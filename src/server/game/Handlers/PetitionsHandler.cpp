@@ -43,7 +43,6 @@
 enum CharterItemIDs
 {
     GUILD_CHARTER                                 = 5863,
-    ARENA_TEAM_CHARTER_1v1                        = 23559,
     ARENA_TEAM_CHARTER_2v2                        = 23560,
     ARENA_TEAM_CHARTER_3v3                        = 23561,
     ARENA_TEAM_CHARTER_5v5                        = 23562
@@ -52,7 +51,6 @@ enum CharterItemIDs
 enum CharterCosts
 {
     GUILD_CHARTER_COST                            = 1000,
-    ARENA_TEAM_CHARTER_1v1_COST                   = 400000,
     ARENA_TEAM_CHARTER_2v2_COST                   = 800000,
     ARENA_TEAM_CHARTER_3v3_COST                   = 1200000,
     ARENA_TEAM_CHARTER_5v5_COST                   = 2000000
@@ -128,11 +126,6 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
 
         switch (clientIndex)                                 // arenaSlot+1 as received from client (1 from 3 case)
         {
-            case 0:
-                charterid = ARENA_TEAM_CHARTER_1v1;
-                cost = ARENA_TEAM_CHARTER_1v1_COST;
-                type = ARENA_TEAM_CHARTER_1v1_TYPE;
-                break;
             case 1:
                 charterid = ARENA_TEAM_CHARTER_2v2;
                 cost = ARENA_TEAM_CHARTER_2v2_COST;
@@ -807,7 +800,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     }
     else
     {
-        // Check for valid arena bracket (1v1, 2v2, 3v3, 5v5)
+        // Check for valid arena bracket (2v2, 3v3, 5v5)
         uint8 slot = ArenaTeam::GetSlotByType(type);
         if (slot >= MAX_ARENA_SLOT)
             return;
@@ -966,13 +959,6 @@ void WorldSession::SendPetitionShowList(uint64 guid)
     else
     {
         data << uint8(3);                                   // count
-        // 1v1
-        data << uint32(0);                                  // index
-        data << uint32(ARENA_TEAM_CHARTER_1v1);             // charter entry
-        data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_1v1_COST);        // charter cost
-        data << uint32(1);                                  // unknown
-        data << uint32(1);                                  // required signs?
         // 2v2
         data << uint32(1);                                  // index
         data << uint32(ARENA_TEAM_CHARTER_2v2);             // charter entry
