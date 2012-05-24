@@ -37,7 +37,6 @@
 #include "BattlegroundRV.h"
 #include "BattlegroundIC.h"
 #include "BattlegroundRB.h"
-#include "BattlegroundSF.h"
 #include "Chat.h"
 #include "Map.h"
 #include "MapInstanced.h"
@@ -340,13 +339,6 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                         *data << uint32(0x00000002);            // count of next fields
                         *data << uint32(((BattlegroundICScore*)itr2->second)->BasesAssaulted);       // bases asssulted
                         *data << uint32(((BattlegroundICScore*)itr2->second)->BasesDefended);        // bases defended
-                    case 750:
-                        *data << uint32(0x00000005);            // count of next fields
-                        *data << uint32(((BattlegroundSFScore*)itr2->second)->TowersDestroyed);
-                        *data << uint32(((BattlegroundSFScore*)itr2->second)->NpcsKilled);
-                        *data << uint32(((BattlegroundSFScore*)itr2->second)->HerosKilled);
-                        *data << uint32(((BattlegroundSFScore*)itr2->second)->CreditsEarned);
-                        *data << uint32(((BattlegroundSFScore*)itr2->second)->CreditsUsed);
                     default:
                         *data << uint32(0);
                         break;
@@ -383,13 +375,6 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
                 *data << uint32(((BattlegroundICScore*)itr2->second)->BasesAssaulted);       // bases asssulted
                 *data << uint32(((BattlegroundICScore*)itr2->second)->BasesDefended);        // bases defended
                 break;
-            case BATTLEGROUND_SF:                           // Sherwood forest
-                *data << uint32(0x00000005);                // count of next fields
-                *data << uint32(((BattlegroundSFScore*)itr2->second)->TowersDestroyed);
-                *data << uint32(((BattlegroundSFScore*)itr2->second)->NpcsKilled);
-                *data << uint32(((BattlegroundSFScore*)itr2->second)->HerosKilled);
-                *data << uint32(((BattlegroundSFScore*)itr2->second)->CreditsEarned);
-                *data << uint32(((BattlegroundSFScore*)itr2->second)->CreditsUsed);
             case BATTLEGROUND_NA:
             case BATTLEGROUND_BE:
             case BATTLEGROUND_AA:
@@ -613,9 +598,6 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
         case BATTLEGROUND_RB:
             bg = new BattlegroundRB(*(BattlegroundRB*)bg_template);
             break;
-        case BATTLEGROUND_SF:
-            bg = new BattlegroundSF(*(BattlegroundSF*)bg_template);
-            break;
         default:
             //error, but it is handled few lines above
             return 0;
@@ -662,7 +644,6 @@ uint32 BattlegroundMgr::CreateBattleground(CreateBattlegroundData& data)
         case BATTLEGROUND_RV: bg = new BattlegroundRV; break;
         case BATTLEGROUND_IC: bg = new BattlegroundIC; break;
         case BATTLEGROUND_RB: bg = new BattlegroundRB; break;
-        case BATTLEGROUND_SF: bg = new BattlegroundSF; break;
         default:
             bg = new Battleground;
             break;
@@ -956,8 +937,6 @@ BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgType
             return BATTLEGROUND_QUEUE_IC;
         case BATTLEGROUND_RB:
             return BATTLEGROUND_QUEUE_RB;
-        case BATTLEGROUND_SF:	
-            return BATTLEGROUND_QUEUE_SF;
         case BATTLEGROUND_AA:
         case BATTLEGROUND_NA:
         case BATTLEGROUND_RL:

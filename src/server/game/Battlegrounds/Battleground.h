@@ -178,11 +178,10 @@ enum BattlegroundQueueTypeId
     BATTLEGROUND_QUEUE_SA       = 5,
     BATTLEGROUND_QUEUE_IC       = 6,
     BATTLEGROUND_QUEUE_RB       = 7,
-    BATTLEGROUND_QUEUE_SF       = 12,
-    BATTLEGROUND_QUEUE_1v1      = 13,
     BATTLEGROUND_QUEUE_2v2      = 8,
     BATTLEGROUND_QUEUE_3v3      = 9,
     BATTLEGROUND_QUEUE_5v5      = 10,
+    BATTLEGROUND_QUEUE_1v1      = 13,
     MAX_BATTLEGROUND_QUEUE_TYPES
 };
 
@@ -212,15 +211,9 @@ enum ScoreType
     //SOTA
     SCORE_DESTROYED_DEMOLISHER  = 18,
     SCORE_DESTROYED_WALL        = 19,
-    //SF
-    SCORE_TOWERS_DESTROYED      = 20,
-    SCORE_NPCS_KILLED           = 21,
-    SCORE_HEROS_KILLED          = 22,
-    SCORE_CREDITS_EARNED        = 23,
-    SCORE_CREDITS_USED          = 24,
     /** World of Warcraft Armory **/
-    SCORE_DAMAGE_TAKEN          = 25,
-    SCORE_HEALING_TAKEN         = 26
+    SCORE_DAMAGE_TAKEN          = 20,
+    SCORE_HEALING_TAKEN         = 21
     /** World of Warcraft Armory **/
 };
 
