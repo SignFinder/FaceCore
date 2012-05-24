@@ -42,7 +42,7 @@ struct GroupQueueInfo                                       // stores informatio
     uint32  Team;                                           // Player team (ALLIANCE/HORDE)
     BattlegroundTypeId BgTypeId;                            // battleground type id
     bool    IsRated;                                        // rated
-    uint8   ArenaType;                                      // 2v2, 3v3, 5v5 or 0 when BG
+    uint8   ArenaType;                                      // 1v1, 2v2, 3v3, 5v5 or 0 when BG
     uint32  ArenaTeamId;                                    // team id if rated match
     uint32  JoinTime;                                       // time when group was added
     uint32  RemoveInviteTime;                               // time when we will remove invite for players in group
