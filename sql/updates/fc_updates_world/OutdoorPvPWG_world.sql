@@ -71,7 +71,7 @@ UPDATE `creature_template` SET `ScriptName` = 'npc_demolisher_engineerer' WHERE 
 DELETE FROM `creature` WHERE `id` IN (32170, 32169);
 INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,`curhealth`,`curmana`,`MovementType`,`npcflag`,`unit_flags`,`dynamicflags`) VALUES
 (NULL, 32170, 571, 1, 65535, 27801, 0, 5917.69, 584.167, 660.49, 5.17983, 300, 0, 0, 504000, 440700, 0, 0, 0, 0),
-(NULL, 32170, 571, 1, 65535, 0, 2796, 5939.59, 556.516, 640.001, 2.70112, 300, 0, 0, 504000, 440700, 0, 0, 0, 0),
+-- (NULL, 32170, 571, 1, 65535, 0, 2796, 5939.59, 556.516, 640.001, 2.70112, 300, 0, 0, 504000, 440700, 0, 0, 0, 0),
 (NULL, 32169, 571, 1, 65535, 0, 0, 5698.38, 777.562, 647.852, 5.56938, 900, 0, 0, 504000, 440700, 0, 0, 0, 0);
 
 UPDATE `creature_template` SET `ScriptName`='npc_wg_ally_battle_mage' WHERE `entry`=32169;
@@ -100,14 +100,6 @@ DELETE FROM `gameobject` WHERE `id`=192829;
 * 194323 - [Wintergrasp Keep Collision Wall X:5396.209961 Y:2840.010010 Z:432.268005 MapId:571
 * 194162 - [Doodad_WG_Keep_Door01_collision01 X:5397.109863 Y:2841.540039 Z:425.901001 MapId:571]*/
 DELETE FROM gameobject WHERE id IN ('194323', '194162');
-
-/* spell target for build vehicles */
-DELETE FROM `conditions` WHERE ConditionValue2=27852;
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(13, 0, 49899, 0, 18, 1, 27852, 0, 0, '', NULL),
-(13, 0, 56665, 0, 18, 1, 27852, 0, 0, '', NULL),
-(13, 0, 56667, 0, 18, 1, 27852, 0, 0, '', NULL),
-(13, 0, 56669, 0, 18, 1, 27852, 0, 0, '', NULL);
 
 /*WG Spell area Data For wg antifly */
 DELETE FROM `spell_area` WHERE spell IN (58730, 57940, 58045);
@@ -151,9 +143,13 @@ INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_start_active`, 
 (58045, 4197, 0, 0, 0, 0, 0, 2, 1);
 
 /* Spell target conditions for spawning WG siege machines in proper place while building it */
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (56575,56661,56663,61408);
+DELETE FROM `conditions` WHERE ConditionValue2=27852;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 49899, 0, 0, 31, 0, 3, 27852, 0, 0, 0, '', NULL),
 (13, 1, 56575, 0, 0, 31, 0, 3, 27852, 0, 0, 0, '', NULL),
 (13, 1, 56661, 0, 0, 31, 0, 3, 27852, 0, 0, 0, '', NULL),
 (13, 1, 56663, 0, 0, 31, 0, 3, 27852, 0, 0, 0, '', NULL),
+(13, 1, 56665, 0, 0, 31, 0, 3, 27852, 0, 0, 0, '', NULL),
+(13, 1, 56667, 0, 0, 31, 0, 3, 27852, 0, 0, 0, '', NULL),
+(13, 1, 56669, 0, 0, 31, 0, 3, 27852, 0, 0, 0, '', NULL),
 (13, 1, 61408, 0, 0, 31, 0, 3, 27852, 0, 0, 0, '', NULL);
