@@ -10849,6 +10849,10 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 
     // Done fixed damage bonus auras
     int32 DoneAdvertisedBenefit  = SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
+    // Pets just add their bonus damage to their spell damage
+    // note that their spell damage is just gain of their own auras
+    if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+        DoneAdvertisedBenefit += ((Guardian*)this)->GetBonusDamage();
 
     // Check for table values
     float coeff = 0;
@@ -11829,9 +11833,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                     AddPctN(DoneTotalMod, (*i)->GetAmount());
             }
         }
-        else if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)
-            if (!HasUnitTypeMask(UNIT_MASK_GUARDIAN))
-                AddPctN(DoneTotalMod, (*i)->GetAmount());
     }
 
     AuraEffectList const& mDamageDoneVersus = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS);
@@ -15122,8 +15123,6 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply
         ApplyPercentModFloatVar(m_modAttackSpeedPct[att], -val, apply);
         ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att, -val, apply);
     }
-    if (GetTypeId() == TYPEID_PLAYER && IsInWorld())
-        ((Player*)this)->CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_ATTACKSPEED, 0, false));
     m_attackTimer[att] = uint32(GetAttackTime(att) * m_modAttackSpeedPct[att] * remainingTimePct);
 }
 
