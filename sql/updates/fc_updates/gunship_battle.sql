@@ -84,9 +84,9 @@ UPDATE `creature_template` SET `flags_extra` = 130 WHERE `entry` = 37547;
 
 UPDATE `creature_template` SET `exp` = 2, `VehicleId` = 554, `RegenHealth` = 0, `npcflag` = 16777216, `spell1` = 69399, `spell2` = 69401 WHERE entry = 36839;
 UPDATE `creature_template` SET `exp` = 2, `VehicleId` = 554, `RegenHealth` = 0, `npcflag` = 16777216, `spell1` = 70172, `spell2` = 70174 WHERE entry = 36838;
-REPLACE INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `quest_start`, `cast_flags`) VALUES
-('36838', '46598', '0', '1'),
-('36839', '46598', '0', '1');
+REPLACE INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`) VALUES
+('36838', '46598', '1'),
+('36839', '46598', '1');
 
 DELETE FROM `creature_template_addon` WHERE `entry` IN (36838, 36839);
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES 
