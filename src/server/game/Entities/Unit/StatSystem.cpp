@@ -1073,6 +1073,8 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 
 bool Guardian::UpdateStats(Stats stat)
 {
+    if (!m_PetScalingData)
+        return false;
     if (stat >= MAX_STATS)
         return false;
 
@@ -1105,6 +1107,9 @@ bool Guardian::UpdateStats(Stats stat)
 
 bool Guardian::UpdateAllStats()
 {
+    if (!m_PetScalingData)
+        return false;
+
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
         UpdateStats(Stats(i));
 
@@ -1148,7 +1153,11 @@ void Guardian::UpdateArmor()
 
 void Guardian::UpdateMaxHealth()
 {
+    if (!m_PetScalingData)
+        return
     if (!CanModifyStats())
+        return;
+    if (GetStat(STAT_STAMINA) == GetCreateStat(STAT_STAMINA)) // I dont know why this is repeated twice and health=health from creature_template
         return;
 
     UnitMods unitMod = UNIT_MOD_HEALTH;
@@ -1164,6 +1173,8 @@ void Guardian::UpdateMaxHealth()
 
 void Guardian::UpdateMaxPower(Powers power)
 {
+    if (!m_PetScalingData)
+        return;
     if (!CanModifyStats())
         return;
 
@@ -1181,6 +1192,9 @@ void Guardian::UpdateMaxPower(Powers power)
 
 void Guardian::UpdateAttackPowerAndDamage(bool ranged)
 {
+    if (!m_PetScalingData)
+        return;
+
     UnitMods unitMod;
     float baseAP       = 0.0f;
 
