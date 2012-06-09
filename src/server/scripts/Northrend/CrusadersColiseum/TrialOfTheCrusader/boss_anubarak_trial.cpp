@@ -615,7 +615,7 @@ class mob_frost_sphere : public CreatureScript
                         me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
                         DoCast(SPELL_PERMAFROST_VISUAL);
                         DoCast(SPELL_PERMAFROST);
-                        me->SetFloatValue(OBJECT_FIELD_SCALE_X, 2.0f);
+                        me->SetObjectScale(2.0f);
                         break;
                 }
             }
@@ -657,6 +657,11 @@ public:
             // For an unknown reason this npc isn't recognize the Aura of Permafrost with this flags =/
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             m_uiTargetGUID = 0;
+        }
+
+        bool CanAIAttack(Unit const* victim) const
+        {
+            return victim->GetTypeId() == TYPEID_PLAYER;
         }
 
         void EnterCombat(Unit* who)

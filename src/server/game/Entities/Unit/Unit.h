@@ -736,19 +736,6 @@ enum MovementFlags2
     MOVEMENTFLAG2_UNK16                    = 0x00008000,
 };
 
-enum SplineFlags
-{
-    SPLINEFLAG_WALKMODE     = 0x00001000,
-    SPLINEFLAG_FLYING       = 0x00002000,
-    SPLINEFLAG_TRANSPORT    = 0x00800000,
-    SPLINEFLAG_EXIT_VEHICLE = 0x01000000,
-};
-
-enum SplineType
-{
-    SPLINETYPE_FACING_ANGLE  = 4,
-};
-
 enum UnitTypeMask
 {
     UNIT_MASK_NONE                  = 0x00000000,
@@ -1630,9 +1617,7 @@ class Unit : public WorldObject
 
         void MonsterMoveWithSpeed(float x, float y, float z, float speed);
         //void SetFacing(float ori, WorldObject* obj = NULL);
-        void SendMonsterMoveExitVehicle(Position const* newPos);
         //void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time, Player* player = NULL);
-        void SendMonsterMoveTransport(Unit* vehicleOwner);
         void SendMovementFlagUpdate();
 
         /*! These methods send the same packet to the client in apply and unapply case.

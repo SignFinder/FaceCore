@@ -395,10 +395,25 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
         m_movesplineTimer.Reset(POSITION_UPDATE_DELAY);
         Movement::Location loc = movespline->ComputePosition();
 
-        if (GetTypeId() == TYPEID_PLAYER)
-            ((Player*)this)->UpdatePosition(loc.x,loc.y,loc.z,loc.orientation);
-        else
-            GetMap()->CreatureRelocation((Creature*)this,loc.x,loc.y,loc.z,loc.orientation);
+        if (HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+        {
+            Position& pos = m_movementInfo.t_pos;
+            pos.m_positionX = loc.x;
+            pos.m_positionY = loc.y;
+            pos.m_positionZ = loc.z;
+            pos.m_orientation = loc.orientation;
+            if (Unit* vehicle = GetVehicleBase())
+            {
+                loc.x += vehicle->GetPositionX();
+                loc.y += vehicle->GetPositionY();
+                loc.z += vehicle->GetPositionZMinusOffset();
+                loc.orientation = vehicle->GetOrientation();
+            }
+            else if (Transport* trans = GetTransport())
+                trans->CalculatePassengerPosition(loc.x, loc.y, loc.z, loc.orientation);
+        }
+
+        UpdatePosition(loc.x, loc.y, loc.z, loc.orientation);
     }
 }
 
@@ -406,50 +421,6 @@ void Unit::DisableSpline()
 {
     m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEMENTFLAG_SPLINE_ENABLED|MOVEMENTFLAG_FORWARD));
     movespline->_Interrupt();
-}
-
-void Unit::SendMonsterMoveExitVehicle(Position const* newPos)
-{
-    WorldPacket data(SMSG_MONSTER_MOVE, 1+12+4+1+4+4+4+12+GetPackGUID().size());
-    data.append(GetPackGUID());
-
-    data << uint8(GetTypeId() == TYPEID_PLAYER ? 1 : 0);    // new in 3.1, bool
-    data << GetPositionX() << GetPositionY() << GetPositionZ();
-    data << getMSTime();
-
-    data << uint8(SPLINETYPE_FACING_ANGLE);
-    data << float(GetOrientation());                        // guess
-    data << uint32(SPLINEFLAG_EXIT_VEHICLE);
-    data << uint32(0);                                      // Time in between points
-    data << uint32(1);                                      // 1 single waypoint
-    data << newPos->GetPositionX();
-    data << newPos->GetPositionY();
-    data << newPos->GetPositionZ();
-
-    SendMessageToSet(&data, true);
-}
-
-void Unit::SendMonsterMoveTransport(Unit* vehicleOwner)
-{
-    // TODO: Turn into BuildMonsterMoveTransport packet and allow certain variables (for npc movement aboard vehicles)
-    WorldPacket data(SMSG_MONSTER_MOVE_TRANSPORT, GetPackGUID().size()+vehicleOwner->GetPackGUID().size() + 47);
-    data.append(GetPackGUID());
-    data.append(vehicleOwner->GetPackGUID());
-    data << int8(GetTransSeat());
-    data << uint8(0);
-    data << GetPositionX() - vehicleOwner->GetPositionX();
-    data << GetPositionY() - vehicleOwner->GetPositionY();
-    data << GetPositionZ() - vehicleOwner->GetPositionZ();
-    data << uint32(getMSTime());            // should be an increasing constant that indicates movement packet count
-    data << uint8(SPLINETYPE_FACING_ANGLE);
-    data << GetTransOffsetO();              // facing angle?
-    data << uint32(SPLINEFLAG_TRANSPORT);
-    data << uint32(GetTransTime());         // move time
-    data << uint32(1);                      // amount of waypoints
-    data << uint32(0);                      // waypoint X
-    data << uint32(0);                      // waypoint Y
-    data << uint32(0);                      // waypoint Z
-    SendMessageToSet(&data, true);
 }
 
 void Unit::resetAttackTimer(WeaponAttackType type)
@@ -2955,9 +2926,11 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
                     InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
                 m_AutoRepeatFirstCast = true;
             }
-            AddUnitState(UNIT_STATE_CASTING);
-        } break;
+            if ((pSpell->m_spellInfo->CalcCastTime(this) > 0) && IsNonMeleeSpellCasted(false, false, true))
+                AddUnitState(UNIT_STATE_CASTING);
 
+            break;
+        }
         case CURRENT_CHANNELED_SPELL:
         {
             // channel spells always break generic non-delayed and any channeled spells
@@ -2969,8 +2942,9 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
                 m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75)
                 InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             AddUnitState(UNIT_STATE_CASTING);
-        } break;
 
+            break;
+        }
         case CURRENT_AUTOREPEAT_SPELL:
         {
             // only Auto Shoot does not break anything
@@ -2982,12 +2956,11 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
             }
             // special action: set first cast flag
             m_AutoRepeatFirstCast = true;
-        } break;
 
+            break;
+        }
         default:
-        {
-            // other spell types don't break anything now
-        } break;
+            break; // other spell types don't break anything now
     }
 
     // current spell (if it is still here) may be safely deleted now
@@ -12785,7 +12758,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
         {
             // Set creature speed rate from CreatureInfo
             if (GetTypeId() == TYPEID_UNIT)
-                speed *= ToCreature()->GetCreatureTemplate()->speed_walk;
+                speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
 
             // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
             // TODO: possible affect only on MOVE_RUN
@@ -13105,8 +13078,7 @@ void Unit::TauntFadeOut(Unit* taunter)
         return;
     }
 
-    //m_ThreatManager.tauntFadeOut(taunter);
-    target = m_ThreatManager.getHostilTarget();
+    target = creature->SelectVictim();  // might have more taunt auras remaining
 
     if (target && target != taunter)
     {
@@ -14904,6 +14876,7 @@ void Unit::StopMoving()
         return;
 
     Movement::MoveSplineInit init(*this);
+    init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZMinusOffset());
     init.SetFacing(GetOrientation());
     init.Launch();
 }
@@ -16424,7 +16397,7 @@ Creature* Unit::GetVehicleCreatureBase() const
 uint64 Unit::GetTransGUID() const
 {
     if (GetVehicle())
-        return GetVehicle()->GetBase()->GetGUID();
+        return GetVehicleBase()->GetGUID();
     if (GetTransport())
         return GetTransport()->GetGUID();
 
@@ -17287,11 +17260,12 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     Vehicle* vehicle = m_vehicle;
     m_vehicle = NULL;
 
-    SetControlled(false, UNIT_STATE_ROOT);       // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
+    SetControlled(false, UNIT_STATE_ROOT);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
 
     Position pos;
-    if (!exitPosition)                           // Exit position not specified
-        vehicle->GetBase()->GetPosition(&pos);
+    if (!exitPosition)                          // Exit position not specified
+        vehicle->GetBase()->GetPosition(&pos);  // This should use passenger's current position, leaving it as it is now
+                                                // because we calculate positions incorrect (sometimes under map)
     else
         pos = *exitPosition;
 
@@ -17306,13 +17280,16 @@ void Unit::_ExitVehicle(Position const* exitPosition)
         SendMessageToSet(&data, false);
     }
 
-    SendMonsterMoveExitVehicle(&pos);
-    Relocate(&pos);
+    Movement::MoveSplineInit init(*this);
+    init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+    init.SetFacing(GetOrientation());
+    init.SetTransportExit();
+    init.Launch();
+
+    //GetMotionMaster()->MoveFall();            // Enable this once passenger positions are calculater properly (see above)
 
     if (Player* player = ToPlayer())
         player->ResummonPetTemporaryUnSummonedIfAny();
-
-    SendMovementFlagUpdate();
 
     if (vehicle->GetBase()->HasUnitTypeMask(UNIT_MASK_MINION))
         if (((Minion*)vehicle->GetBase())->GetOwner() == this)
@@ -17709,6 +17686,7 @@ void Unit::SetInFront(Unit const* target)
 void Unit::SetFacingTo(float ori)
 {
     Movement::MoveSplineInit init(*this);
+    init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZMinusOffset());
     init.SetFacing(ori);
     init.Launch();
 }

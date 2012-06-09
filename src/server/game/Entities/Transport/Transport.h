@@ -48,6 +48,8 @@ class Transport : public GameObject
         Creature* AddNPCPassengerInInstance(uint32 entry, float x, float y, float z, float o, uint32 anim=0);
         void UpdatePosition(MovementInfo* mi);
         void UpdateNPCPositions();
+        void CalculatePassengerPosition(float& x, float& y, float& z, float& o);
+        void CalculatePassengerOffset(float& x, float& y, float& z, float& o);
         void BuildStartMovePacket(Map const* targetMap);
         void BuildStopMovePacket(Map const* targetMap);
         uint32 GetScriptId() const { return ScriptId; }
