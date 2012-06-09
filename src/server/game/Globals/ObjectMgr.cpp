@@ -2952,9 +2952,9 @@ void ObjectMgr::LoadPetLevelInfo()
                 if (pInfo[level].mindmg == 0)
                     pInfo[level].mindmg = uint16(pInfo[pLevel].mindmg * (petBaseInfo[level].mindmg / petBaseInfo[pLevel].mindmg));
                 if (pInfo[level].maxdmg == 0)
-                    pInfo[level].mana = uint16(pInfo[pLevel].maxdmg * (petBaseInfo[level].maxdmg / petBaseInfo[pLevel].maxdmg));
+                    pInfo[level].maxdmg = uint16(pInfo[pLevel].maxdmg * (petBaseInfo[level].maxdmg / petBaseInfo[pLevel].maxdmg));
                 if (pInfo[level].attackpower == 0)
-                    pInfo[level].mana = uint16(pInfo[pLevel].attackpower * (petBaseInfo[level].attackpower / petBaseInfo[pLevel].attackpower));
+                    pInfo[level].attackpower = uint16(pInfo[pLevel].attackpower * (petBaseInfo[level].attackpower / petBaseInfo[pLevel].attackpower));
                 for (int i = 0; i < MAX_STATS; i++)
                 {
                     if (pInfo[level].stats[i] == 0)
