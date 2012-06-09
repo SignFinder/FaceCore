@@ -2131,7 +2131,7 @@ void ApplyScalingBonusWithHelper::operator() (Unit* unit) const
 
     Pet* pet = (Pet*)unit;
 
-    if (pet->IsInWorld())
+    if (pet && pet->IsInWorld())
         pet->AddScalingAction(target, stat, apply);
 }
 
