@@ -1154,7 +1154,7 @@ void Guardian::UpdateArmor()
 void Guardian::UpdateMaxHealth()
 {
     if (!m_PetScalingData)
-        return
+        return;
     if (!CanModifyStats())
         return;
     if (GetStat(STAT_STAMINA) == GetCreateStat(STAT_STAMINA)) // I dont know why this is repeated twice and health=health from creature_template
