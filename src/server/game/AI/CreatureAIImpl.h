@@ -581,7 +581,7 @@ inline bool CreatureAI::_EnterEvadeMode()
 {
     if (!me->isAlive())
         return false;
-    if (isPet() || isGuardian() || isSummon())
+    if (me->isPet() || me->isGuardian() || me->isSummon())
         me->RemoveAllAurasExceptAttribute4(SPELL_ATTR4_IS_PET_SCALING);
     else
     // dont remove vehicle auras, passengers arent supposed to drop off the vehicle
