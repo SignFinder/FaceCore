@@ -60,7 +60,7 @@ void GuardAI::EnterEvadeMode()
 
     sLog->outDebug(LOG_FILTER_UNITS, "Guard entry: %u enters evade mode.", me->GetEntry());
 
-    me->RemoveAllAurasExceptType();
+    me->RemoveAllAuras();
     me->DeleteThreatList();
     me->CombatStop(true);
 
