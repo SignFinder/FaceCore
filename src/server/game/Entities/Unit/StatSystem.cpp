@@ -1157,8 +1157,6 @@ void Guardian::UpdateMaxHealth()
         return;
     if (!CanModifyStats())
         return;
-    if (GetStat(STAT_STAMINA) == GetCreateStat(STAT_STAMINA)) // I dont know why this is repeated twice and health=health from creature_template
-        return;
 
     UnitMods unitMod = UNIT_MOD_HEALTH;
     float staminaBonus = (GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA)) * (CalculateScalingData()->healthScale / 100.0f);
