@@ -3,7 +3,7 @@
 DELETE FROM `spell_pet_auras` WHERE `aura`='54566'; -- Deathknight Pet Scaling
 DELETE FROM `spell_pet_auras` WHERE `spell` IN (34455,34459,34460); -- Ferocious Inspiration
 DELETE FROM `spell_pet_auras` WHERE `spell` IN (54037,54038); -- Improved Felhunter
-DELETE FROM `spell_pet_auras` WHERE `spell`='0' AND `pet` IN (1,89,416,417,510,1860,1863,15352,15438,17252,19668,24207,26125,27829,28017,29264,31216,37994,27893);
+DELETE FROM `spell_pet_auras` WHERE `spell`='0' AND `pet` IN (1,89,416,417,510,1860,1863,1964,15352,15438,17252,19668,24207,26125,27829,28017,29264,31216,37994,27893);
 INSERT INTO `spell_pet_auras`
     (`spell`, `effectId`, `pet`, `aura`)
 VALUES
@@ -49,9 +49,11 @@ VALUES
     (0,0,1863,61013),
     -- Greater Earth Elemetal
     (0,0,15352,34947),
+    (0,0,15352, 7941),
     -- Shaman Greater Fire Elemetal
     (0,0,15438,34956),
     (0,0,15438,34947),
+    (0,0,15438, 7942),
     -- Warlock Felguard
     (0,0,17252,34947),
     (0,0,17252,34956),
@@ -91,6 +93,8 @@ VALUES
     (34455,0,0,75593),
     (34459,0,0,75446),
     (34460,0,0,75447),
+    -- Force of Nature
+    (0,0,1964,34947),
     -- Rune Weapon
     (0,0,27893,51996),
     (0,0,27893,54566),
