@@ -352,7 +352,7 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
 {
     if (!InitEntry(Entry, team, data))
         return false;
-    if (isPet() || isGuardian() || isSummon()) // Calculate in Guardian::InitStatsForLevel()
+    if (isPet() || isGuardian()) // Calculate in Guardian::InitStatsForLevel()
         return true;
 
     CreatureTemplate const* cInfo = GetCreatureTemplate();
