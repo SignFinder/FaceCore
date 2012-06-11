@@ -420,6 +420,18 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         if (!unitTarget->HasAura(27825))
                             return;
                         break;
+                    case 51963:
+                    {
+                        m_damage = 0;
+                        apply_direct_bonus = false;
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(54566,2))
+                        {
+                            int32 bp2 = aurEff->GetAmount() * 2; // half of DK's ap
+                            if (bp2 > 0)
+                                damage = int32(120 + 0.33*bp2); // AP*0.33 + 120
+                        }
+                        break;
+                    }
                 }
                 break;
             }
