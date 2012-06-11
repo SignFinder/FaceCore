@@ -60,7 +60,7 @@ void GuardAI::EnterEvadeMode()
 
     sLog->outDebug(LOG_FILTER_UNITS, "Guard entry: %u enters evade mode.", me->GetEntry());
 
-    me->RemoveAllAuras();
+    me->RemoveAllAurasExceptAttribute4(SPELL_ATTR4_IS_PET_SCALING);
     me->DeleteThreatList();
     me->CombatStop(true);
 
