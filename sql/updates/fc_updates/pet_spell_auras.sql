@@ -3,7 +3,7 @@
 DELETE FROM `spell_pet_auras` WHERE `aura`='54566'; -- Deathknight Pet Scaling
 DELETE FROM `spell_pet_auras` WHERE `spell` IN (34455,34459,34460); -- Ferocious Inspiration
 DELETE FROM `spell_pet_auras` WHERE `spell` IN (54037,54038); -- Improved Felhunter
-DELETE FROM `spell_pet_auras` WHERE `spell`='0' AND `pet` IN (1,89,416,417,510,1860,1863,15352,15438,17252,19668,24207,26125,27829,28017,29264,31216,37994);
+DELETE FROM `spell_pet_auras` WHERE `spell`='0' AND `pet` IN (1,89,416,417,510,1860,1863,15352,15438,17252,19668,24207,26125,27829,28017,29264,31216,37994,27893);
 INSERT INTO `spell_pet_auras`
     (`spell`, `effectId`, `pet`, `aura`)
 VALUES
@@ -72,6 +72,8 @@ VALUES
     (0,0,26125,50142),
     -- DK Gargoyle
     (0,0,27829,54566),
+    (0,0,27829,51996),
+    (0,0,27829,61697),
     -- Deathknight Bloodworms
     (0,0,28017,50453),
     -- Shaman Wolf
@@ -88,5 +90,10 @@ VALUES
     -- Ferocious Inspiration
     (34455,0,0,75593),
     (34459,0,0,75446),
-    (34460,0,0,75447);
+    (34460,0,0,75447),
+    -- Rune Weapon
+    (0,0,27893,51996),
+    (0,0,27893,54566),
+    (0,0,27893,61697),
+    (0,0,27893,51906);
 
