@@ -160,9 +160,6 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
     {
         case SMART_ACTION_TALK:
         {
-            if (!me)
-                break;
-
             ObjectList* targets = GetTargets(e, unit);
             Creature* talker = me;
             Player* targetPlayer = NULL;
@@ -184,6 +181,9 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
                 delete targets;
             }
+
+            if (!talker)
+                break;
 
             mTalkerEntry = talker->GetEntry();
             mLastTextID = e.action.talk.textGroupID;
@@ -2769,6 +2769,13 @@ void SmartScript::ProcessEvent(SmartScriptHolder& e, Unit* unit, uint32 var0, ui
             if (e.event.goStateChanged.state != var0)
                 return;
             ProcessAction(e, unit, var0, var1);
+            break;
+        }
+        case SMART_EVENT_GO_EVENT_INFORM:
+        {
+            if (e.event.eventInform.eventId != var0)
+                return;
+            ProcessAction(e, NULL, var0);
             break;
         }
         default:
