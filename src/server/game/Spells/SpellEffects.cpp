@@ -386,8 +386,14 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     // Gargoyle Strike
                     case 51963:
                     {
-                        // about +4 base spell dmg per level
-                        damage = (m_caster->getLevel() - 60) * 4 + 60;
+                        m_damage = 0;
+                        apply_direct_bonus = false;
+                        if (AuraEffect* aurEff = m_caster->GetAuraEffect(54566,2))
+                        {
+                            int32 bp2 = aurEff->GetAmount() * 2; // half of DK's ap
+                            if (bp2 > 0)
+                                damage = int32(120 + 0.33*bp2); // AP*0.33 + 120
+                        }
                         break;
                     }
                 }
