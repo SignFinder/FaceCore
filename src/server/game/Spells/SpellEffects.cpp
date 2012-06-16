@@ -6598,6 +6598,8 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
         TempSummon* summon = map->SummonCreature(entry, pos, properties, duration, caster, m_spellInfo->Id);
         if (!summon)
             return;
+        if (summon->HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+            ((Guardian*)summon)->InitStatsForLevel(level);
 
         if (properties && properties->Category == SUMMON_CATEGORY_ALLY)
             summon->setFaction(caster->getFaction());
