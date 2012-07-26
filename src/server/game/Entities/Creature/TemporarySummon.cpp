@@ -307,15 +307,38 @@ bool Minion::IsGuardianPet() const
 }
 
 Guardian::Guardian(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject) : Minion(properties, owner, isWorldObject)
-, m_bonusSpellDamage(0)
+, m_PetScalingData(NULL)
 {
-    memset(m_statFromOwner, 0, sizeof(float)*MAX_STATS);
     m_unitTypeMask |= UNIT_MASK_GUARDIAN;
     if (properties && properties->Type == SUMMON_TYPE_PET)
     {
         m_unitTypeMask |= UNIT_MASK_CONTROLABLE_GUARDIAN;
         InitCharmInfo();
     }
+    m_baseBonusData = new PetScalingData;
+}
+
+Guardian::~Guardian()
+{
+    if (m_PetScalingData)
+        delete m_PetScalingData;
+
+    if (m_baseBonusData)
+        delete m_baseBonusData;
+}
+
+void Guardian::Update(uint32 time)
+{
+    //Minion::Update(time);
+    TempSummon::Update(time); // i don't know what of these updates is better
+
+    // Update scaling auras from queue
+    if (IsInWorld() && isAlive())
+        while (!m_scalingQueue.empty())
+        {
+            ApplyScalingBonus(&m_scalingQueue.front());
+            m_scalingQueue.pop();
+        };
 }
 
 void Guardian::InitStats(uint32 duration)

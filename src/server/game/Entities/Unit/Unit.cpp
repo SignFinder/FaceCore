@@ -3991,6 +3991,27 @@ void Unit::RemoveAllAurasExceptType(AuraType type)
     }
 }
 
+void Unit::RemoveAllAurasExceptAttribute4(SpellAttr4 attribute)
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        Aura const* aura = iter->second->GetBase();
+        if (!aura->GetSpellInfo()->AttributesEx4 & attribute)
+            _UnapplyAura(iter, AURA_REMOVE_BY_DEFAULT);
+        else
+            ++iter;
+    }
+
+    for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
+    {
+        Aura* aura = iter->second;
+        if (!aura->GetSpellInfo()->AttributesEx4 & attribute)
+            RemoveOwnedAura(iter, AURA_REMOVE_BY_DEFAULT);
+        else
+            ++iter;
+    }
+}
+
 void Unit::DelayOwnedAuras(uint32 spellId, uint64 caster, int32 delaytime)
 {
     for (AuraMap::iterator iter = m_ownedAuras.lower_bound(spellId); iter != m_ownedAuras.upper_bound(spellId);++iter)
@@ -10711,10 +10732,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 
     // Done fixed damage bonus auras
     int32 DoneAdvertisedBenefit  = SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
-    // Pets just add their bonus damage to their spell damage
-    // note that their spell damage is just gain of their own auras
-    if (HasUnitTypeMask(UNIT_MASK_GUARDIAN))
-        DoneAdvertisedBenefit += ((Guardian*)this)->GetBonusDamage();
 
     // Check for table values
     float coeff = 0;
@@ -11727,6 +11744,9 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                     else if (ToPlayer() && ToPlayer()->HasItemFitToSpellRequirements((*i)->GetSpellInfo()))
                         AddPctN(DoneTotalMod, (*i)->GetAmount());
                 }
+                else if ((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL)
+                    if (!HasUnitTypeMask(UNIT_MASK_GUARDIAN))
+                        AddPctN(DoneTotalMod, (*i)->GetAmount());
             }
         }
 
@@ -15046,6 +15066,8 @@ void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply
         ApplyPercentModFloatVar(m_modAttackSpeedPct[att], -val, apply);
         ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att, -val, apply);
     }
+    if (GetTypeId() == TYPEID_PLAYER && IsInWorld())
+        ((Player*)this)->CallForAllGuardians(ApplyScalingBonusWithHelper(SCALING_TARGET_ATTACKSPEED, 0, false));
     m_attackTimer[att] = uint32(GetAttackTime(att) * m_modAttackSpeedPct[att] * remainingTimePct);
 }
 

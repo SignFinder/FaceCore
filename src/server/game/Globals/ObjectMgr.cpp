@@ -2844,8 +2844,8 @@ void ObjectMgr::LoadPetLevelInfo()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                 0               1      2   3     4    5    6    7     8    9
-    QueryResult result = WorldDatabase.Query("SELECT creature_entry, level, hp, mana, str, agi, sta, inte, spi, armor FROM pet_levelstats");
+    //                                                 0               1      2   3     4    5    6    7     8    9      10      11        12
+    QueryResult result = WorldDatabase.Query("SELECT creature_entry, level, hp, mana, str, agi, sta, inte, spi, armor, mindmg, maxdmg, attackpower FROM pet_levelstats");
 
     if (!result)
     {
@@ -2896,35 +2896,70 @@ void ObjectMgr::LoadPetLevelInfo()
         pLevelInfo->health = fields[2].GetUInt16();
         pLevelInfo->mana   = fields[3].GetUInt16();
         pLevelInfo->armor  = fields[9].GetUInt32();
+        pLevelInfo->mindmg = fields[10].GetUInt32();
+        pLevelInfo->maxdmg = fields[11].GetUInt32();
+        pLevelInfo->attackpower = fields[12].GetUInt32();
 
-        for (int i = 0; i < MAX_STATS; i++)
-        {
+        for (uint8 i = 0; i < MAX_STATS; i++)
             pLevelInfo->stats[i] = fields[i+4].GetUInt16();
-        }
 
         ++count;
     }
     while (result->NextRow());
 
+    PetLevelInfo* petBaseInfo = _petInfoStore[1];
+    uint16 pLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) - 1;
+
     // Fill gaps and check integrity
     for (PetLevelInfoContainer::iterator itr = _petInfoStore.begin(); itr != _petInfoStore.end(); ++itr)
     {
+        if (itr->first == 1) continue; // No fill data for default pet! _Must_ be exist!
+
         PetLevelInfo* pInfo = itr->second;
 
-        // fatal error if no level 1 data
-        if (!pInfo || pInfo[0].health == 0)
+        // fatal error if no level 1 and max health data
+        if(!pInfo || pInfo[0].health == 0 || pInfo[pLevel].health == 0 )
         {
-            sLog->outErrorDb("Creature %u does not have pet stats data for Level 1!", itr->first);
+            sLog->outErrorDb("Creature %u does not have pet stats data for Levels 1 or %u! Must be exist!",itr->first, pLevel);
             exit(1);
         }
 
         // fill level gaps
-        for (uint8 level = 1; level < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
+        for (uint8 level = 1; level < pLevel; ++level)
         {
-            if (pInfo[level].health == 0)
+            if
+            (
+               pInfo[level].health == 0
+               || pInfo[level].mana == 0
+               || pInfo[level].armor == 0
+               || pInfo[level].mindmg == 0
+               || pInfo[level].maxdmg == 0
+               || pInfo[level].stats[STAT_STRENGTH] == 0
+               || pInfo[level].stats[STAT_STAMINA] == 0
+               || pInfo[level].stats[STAT_AGILITY] == 0
+               || pInfo[level].stats[STAT_INTELLECT] == 0
+               || pInfo[level].stats[STAT_SPIRIT] == 0
+            )
             {
-                sLog->outErrorDb("Creature %u has no data for Level %i pet stats data, using data of Level %i.", itr->first, level+1, level);
-                pInfo[level] = pInfo[level-1];
+                sLog->outErrorDb("Creature %u has no full data set for Level %i pet stats data, using approximated (from default pet progression) data",itr->first,level+1);
+
+                if (pInfo[level].health == 0)
+                    pInfo[level].health = uint16(pInfo[pLevel].health * (petBaseInfo[level].health / petBaseInfo[pLevel].health));
+                if (pInfo[level].mana == 0)
+                    pInfo[level].mana = uint16(pInfo[pLevel].mana * (petBaseInfo[level].mana / petBaseInfo[pLevel].mana));
+                if (pInfo[level].armor == 0)
+                    pInfo[level].armor = uint16(pInfo[pLevel].armor * (petBaseInfo[level].armor / petBaseInfo[pLevel].armor));
+                if (pInfo[level].mindmg == 0)
+                    pInfo[level].mindmg = uint16(pInfo[pLevel].mindmg * (petBaseInfo[level].mindmg / petBaseInfo[pLevel].mindmg));
+                if (pInfo[level].maxdmg == 0)
+                    pInfo[level].maxdmg = uint16(pInfo[pLevel].maxdmg * (petBaseInfo[level].maxdmg / petBaseInfo[pLevel].maxdmg));
+                if (pInfo[level].attackpower == 0)
+                    pInfo[level].attackpower = uint16(pInfo[pLevel].attackpower * (petBaseInfo[level].attackpower / petBaseInfo[pLevel].attackpower));
+                for (int i = 0; i < MAX_STATS; i++)
+                {
+                    if (pInfo[level].stats[i] == 0)
+                        pInfo[level].stats[i] = uint16(pInfo[pLevel].stats[i] * (petBaseInfo[level].stats[i] / petBaseInfo[pLevel].stats[i]));
+                }
             }
         }
     }
@@ -2984,6 +3019,89 @@ void ObjectMgr::PlayerCreateInfoAddItemHelper(uint32 race_, uint32 class_, uint3
             }
         }
     }
+}
+
+void ObjectMgr::LoadPetScalingData()
+{
+    // Loading scaling data
+    uint32 oldMSTime = getMSTime();
+    //                                                 0               1     2           3       4          5       6    7    8    9     10
+    QueryResult result = WorldDatabase.Query("SELECT creature_entry, aura, healthbase, health, powerbase, power,  str, agi, sta, inte, spi,"
+    //                                          11     12           13           14           15           16           17
+                                               "armor, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6," 
+    //                                          18      19           20           21      22           23        24   25         26           27    28
+                                               "apbase, apbasescale, attackpower, damage, spelldamage, spellhit, hit, expertize, attackspeed, crit, regen"
+                                               " FROM pet_scaling_data");
+
+    if (!result)
+    {
+        sLog->outString();
+        sLog->outErrorDb("Loaded 0 pet scaling aura definitions. DB table `pet_scaling_data` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 creature_id = fields[0].GetUInt32();
+        if(creature_id && !sObjectMgr->GetCreatureTemplate(creature_id)) // in 0 creature_id storing default values. _must_ be exist.
+        {
+            sLog->outErrorDb("Wrong creature id %u in `pet_scaling_data` table, ignoring.",creature_id);
+            continue;
+        }
+
+        PetScalingDataList*& pScalingDataList = m_PetScalingData[creature_id];
+        if (pScalingDataList == NULL)
+            pScalingDataList =  new PetScalingDataList;
+
+        PetScalingData pScalingDataEntry;
+
+        pScalingDataEntry.creatureID = fields[0].GetUInt32();
+        pScalingDataEntry.requiredAura = fields[1].GetUInt32();
+        pScalingDataEntry.healthBasepoint = fields[2].GetUInt16();
+        pScalingDataEntry.healthScale = fields[3].GetUInt16();
+        pScalingDataEntry.powerBasepoint = fields[4].GetUInt16();
+        pScalingDataEntry.powerScale = fields[5].GetUInt16();
+        for (uint8 i = 0; i < MAX_STATS; ++i)
+            pScalingDataEntry.statScale[i] = fields[i+6].GetUInt16();
+        for (uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
+            pScalingDataEntry.resistanceScale[i] = fields[i+11].GetUInt16();
+        pScalingDataEntry.APBasepoint = fields[18].GetUInt16();
+        pScalingDataEntry.APBaseScale = fields[19].GetUInt16();
+        pScalingDataEntry.attackpowerScale = fields[20].GetUInt16();
+        pScalingDataEntry.damageScale = fields[21].GetUInt16();
+        pScalingDataEntry.spelldamageScale = fields[22].GetUInt16();
+        pScalingDataEntry.spellHitScale = fields[23].GetUInt16();
+        pScalingDataEntry.meleeHitScale = fields[24].GetUInt16();
+        pScalingDataEntry.expertizeScale = fields[25].GetUInt16();
+        pScalingDataEntry.attackspeedScale = fields[26].GetUInt16();
+        pScalingDataEntry.critScale = fields[27].GetUInt16();
+        pScalingDataEntry.powerregenScale = fields[28].GetUInt16();
+
+        pScalingDataList->push_back(pScalingDataEntry);
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    sLog->outString(">> Loaded %u level pet scaling data definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    sLog->outString();
+
+    //delete result;
+    //m_PetScalingData.clear();
+}
+
+PetScalingDataList const* ObjectMgr::GetPetScalingData(uint32 creature_id) const
+{
+    PetScalingDataMap::const_iterator itr = m_PetScalingData.find(creature_id);
+
+    if (itr == m_PetScalingData.end())
+        return NULL;
+    else
+        return itr->second;
 }
 
 void ObjectMgr::LoadPlayerInfo()

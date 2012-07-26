@@ -408,7 +408,44 @@ struct PetLevelInfo
     uint16 health;
     uint16 mana;
     uint16 armor;
+    uint32 mindmg;
+    uint32 maxdmg;
+    uint32 attackpower;
 };
+
+struct PetScalingData
+{
+    PetScalingData() : creatureID(0), requiredAura(0),
+    healthBasepoint(0), healthScale(0), powerBasepoint(0), powerScale(0),
+    APBasepoint(0), APBaseScale(0), attackpowerScale(0), damageScale(0), spelldamageScale(0), spellHitScale(0),
+    meleeHitScale(0), expertizeScale(0), attackspeedScale(0), critScale(0), powerregenScale(0)
+    {
+        for(uint8 i = 0; i < MAX_STATS; ++i) statScale[i] = 0;
+        for(uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i) resistanceScale[i] = 0;
+    }
+
+    uint32  creatureID;
+    uint32  requiredAura;
+    uint16  healthBasepoint;
+    uint16  healthScale;
+    uint16  powerBasepoint;
+    uint16  powerScale;
+    uint16  APBasepoint;
+    uint16  APBaseScale;
+    uint16  statScale[MAX_STATS];
+    uint16  resistanceScale[MAX_SPELL_SCHOOL];
+    uint16  attackpowerScale;
+    uint16  damageScale;
+    uint16  spelldamageScale;
+    uint16  spellHitScale;
+    uint16  meleeHitScale;
+    uint16  expertizeScale;
+    uint16  attackspeedScale;
+    uint16  critScale;
+    uint16  powerregenScale;
+};
+
+typedef std::vector<PetScalingData> PetScalingDataList;
 
 struct MailLevelReward
 {
@@ -642,6 +679,8 @@ class ObjectMgr
         InstanceTemplate const* GetInstanceTemplate(uint32 mapId);
 
         PetLevelInfo const* GetPetLevelInfo(uint32 creature_id, uint8 level) const;
+
+        PetScalingDataList const* GetPetScalingData(uint32 creature_id) const;
 
         PlayerClassInfo const* GetPlayerClassInfo(uint32 class_) const
         {
@@ -886,6 +925,7 @@ class ObjectMgr
 
         void LoadPlayerInfo();
         void LoadPetLevelInfo();
+        void LoadPetScalingData();
         void LoadExplorationBaseXP();
         void LoadPetNames();
         void LoadPetNumber();
@@ -1224,6 +1264,9 @@ class ObjectMgr
         MailLevelRewardContainer _mailLevelRewardStore;
 
         CreatureBaseStatsContainer _creatureBaseStatsStore;
+
+        typedef std::map<uint32, PetScalingDataList*> PetScalingDataMap;
+        PetScalingDataMap m_PetScalingData;                            // [creature_id]
 
         typedef std::map<uint32, PetLevelInfo*> PetLevelInfoContainer;
         // PetLevelInfoContainer[creature_id][level]

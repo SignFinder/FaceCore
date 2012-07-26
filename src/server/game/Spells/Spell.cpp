@@ -4907,13 +4907,16 @@ SpellCastResult Spell::CheckCast(bool strict)
     {
         if (m_spellInfo->Effects[j].TargetA.GetTarget() == TARGET_UNIT_PET)
         {
-            if (!m_caster->GetGuardianPet())
+            Guardian *pet = m_caster->GetGuardianPet();
+            if (!pet)
             {
                 if (m_triggeredByAuraSpell)              // not report pet not existence for triggered spells
                     return SPELL_FAILED_DONT_REPORT;
                 else
                     return SPELL_FAILED_NO_PET;
             }
+            else if (!pet->isAlive())
+                return SPELL_FAILED_TARGETS_DEAD;
             break;
         }
     }

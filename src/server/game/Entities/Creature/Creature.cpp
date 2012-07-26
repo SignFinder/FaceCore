@@ -2068,7 +2068,14 @@ CreatureAddon const* Creature::GetCreatureAddon() const
     }
 
     // dependent from difficulty mode entry
-    return sObjectMgr->GetCreatureTemplateAddon(GetCreatureTemplate()->Entry);
+    if (GetEntry() != GetCreatureTemplate()->Entry)
+    {
+        if (CreatureAddon const* addon =  sObjectMgr->GetCreatureTemplateAddon(GetCreatureTemplate()->Entry))
+            return addon;
+    }
+
+    // fallback to entry of normal mode
+    return sObjectMgr->GetCreatureTemplateAddon(GetEntry());
 }
 
 //creature_addon table

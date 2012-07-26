@@ -1576,7 +1576,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                     caster->CastSpell(target, spell_id, true);
                 }
-                break;
+                // Animal Handler
+                if (GetId() == 68361)
+                {
+                    if (Unit * owner = target->GetOwner())
+                        if (AuraEffect * auraEff = owner->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2234, 1))
+                            GetEffect(0)->SetAmount(auraEff->GetAmount());
+                }
                 // Glyph of Freezing Trap
                 if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00000008)
                     if (caster && caster->HasAura(56845))

@@ -36,7 +36,7 @@
 Pet::Pet(Player* owner, PetType type) : Guardian(NULL, owner, true),
 m_usedTalentCount(0), m_removed(false), m_owner(owner),
 m_happinessTimer(7500), m_petType(type), m_duration(0),
-m_auraRaidUpdateMask(0), m_loading(false), m_declinedname(NULL)
+m_auraRaidUpdateMask(0), m_loading(false), m_declinedname(NULL), m_HappinessState(0)
 {
     m_unitTypeMask |= UNIT_MASK_PET;
     if (type == HUNTER_PET)
@@ -236,6 +236,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL))); // cast can't be helped here
     SetCreatorGUID(owner->GetGUID());
 
+    if (!is_temporary_summoned)
+        _LoadSpells();
+
     InitStatsForLevel(petlevel);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[5].GetUInt32());
 
@@ -311,7 +314,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     {
         m_charmInfo->LoadPetActionBar(fields[13].GetString());
 
-        _LoadSpells();
         InitTalentForLevel();                               // re-init to check talent count
         _LoadSpellCooldowns();
         LearnPetPassives();
@@ -623,11 +625,30 @@ void Pet::Update(uint32 diff)
             else
                 m_happinessTimer -= diff;
 
+            // Do something with it
+            /*if (m_happinessTimer <= diff)
+            {
+                if (!isInCombat() || IsPolymorphed())
+                    RegenerateHealth(REGEN_TIME_FULL);
+                m_regenHealthTimer = 7500;
+            }
+            else
+                m_regenHealthTimer -= diff;*/
+
             break;
         }
         default:
             break;
     }
+
+    // Update scaling auras from queue
+    if (isAlive())
+        while (!m_scalingQueue.empty())
+        {
+            ApplyScalingBonus(&m_scalingQueue.front());
+            m_scalingQueue.pop();
+        };
+
     Creature::Update(diff);
 }
 
@@ -655,6 +676,14 @@ void Creature::Regenerate(Powers power)
             addvalue = 20;
             break;
         }
+        /*case POWER_HAPPINESS:
+        {
+            addvalue = -178.0f;                                   //value is 70/35/17/8/4 (per min) * 1000 / 8 (timer 2 secs)
+            if (isInCombat())                                     //we know in combat happiness fades faster, multiplier guess
+                addvalue = addvalue * 1.5f;
+            ApplyHappinessBonus(true);
+            break;
+        }*/
         default:
             return;
     }
@@ -846,235 +875,178 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             sLog->outError("Unknown type pet %u is summoned by player class %u", GetEntry(), m_owner->getClass());
     }
 
-    uint32 creature_ID = (petType == HUNTER_PET) ? 1 : cinfo->Entry;
+    if (!petlevel)
+        petlevel = GetOwner()->getLevel();
+
+    PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(cinfo->Entry, petlevel);
 
     SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
 
-    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(petlevel*50));
-
-    SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
-    SetAttackTime(OFF_ATTACK, BASE_ATTACK_TIME);
-    SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
-
-    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
-
-    //scale
-    CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
-    if (cFamily && cFamily->minScale > 0.0f && petType == HUNTER_PET)
+    int32 createStats[MAX_STATS+7] =
     {
-        float scale;
-        if (getLevel() >= cFamily->maxScaleLevel)
-            scale = 1.0f;
-        else if (getLevel() <= cFamily->minScaleLevel)
-            scale = 0.5f;
-        else
-            scale = 0.4f + float(getLevel() / 100.0f);
+        22,    // STAT_STRENGTH
+        22,    // STAT_AGILITY
+        25,    // STAT_STAMINA
+        28,    // STAT_INTELLECT
+        27,    // STAT_SPIRIT
+        42,    // Base HEALTH
+        20,    // Base POWER/MANA
+        10,    // Base AttackPower
+        5,     // Base MinDamage
+        10,    // Base MaxDamage
+        1,     // Base MinRangeDamage
+        3      // Base MaxRangeDamage
+    };
 
-        SetObjectScale(scale);
+    //resistance
+    int32 createResistance[MAX_SPELL_SCHOOL] = { 0, 0, 0, 0, 0, 0, 0 };
+    if (cinfo)
+    {
+        createResistance[SPELL_SCHOOL_HOLY]   = cinfo->resistance[SPELL_SCHOOL_HOLY];
+        createResistance[SPELL_SCHOOL_FIRE]   = cinfo->resistance[SPELL_SCHOOL_FIRE];
+        createResistance[SPELL_SCHOOL_NATURE] = cinfo->resistance[SPELL_SCHOOL_NATURE];
+        createResistance[SPELL_SCHOOL_FROST]  = cinfo->resistance[SPELL_SCHOOL_FROST];
+        createResistance[SPELL_SCHOOL_SHADOW] = cinfo->resistance[SPELL_SCHOOL_SHADOW];
+        createResistance[SPELL_SCHOOL_ARCANE] = cinfo->resistance[SPELL_SCHOOL_ARCANE];
+        // Armor
+        createResistance[SPELL_SCHOOL_NORMAL] = int32(cinfo->ModArmor  * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
+
+        for (uint8 i = 0; i < MAX_STATS; ++i)
+            createStats[i] *= petlevel/10;
+
+        createStats[MAX_STATS]    = int32(cinfo->ModHealth * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
+        createStats[MAX_STATS+1]  = int32(cinfo->ModMana * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
+        createStats[MAX_STATS+2]  = int32(cinfo->attackpower * petlevel / cinfo->maxlevel / (1 +  cinfo->rank));
+        createStats[MAX_STATS+3]  = int32(cinfo->mindmg * petlevel / cinfo->maxlevel / (1 + cinfo->rank));
+        createStats[MAX_STATS+4]  = int32(cinfo->maxdmg * petlevel / cinfo->maxlevel / (1 + cinfo->rank));
+        createStats[MAX_STATS+5]  = int32(cinfo->minrangedmg * petlevel / cinfo->maxlevel/ (1 + cinfo->rank));
+        createStats[MAX_STATS+6]  = int32(cinfo->maxrangedmg * petlevel / cinfo->maxlevel/ (1 + cinfo->rank));
+        SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, float(cinfo->maxrangedmg * petlevel / cinfo->maxlevel));
+        //setPowerType(Powers(cinfo->powerType));
+        SetAttackTime(BASE_ATTACK, cinfo->baseattacktime);
+        SetAttackTime(RANGED_ATTACK, cinfo->rangeattacktime);
+    }
+    else
+    {
+        SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
+        SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
+
+        for (uint8 i = 0; i < MAX_STATS+7; ++i)
+            createStats[i] *= petlevel/10;
+        // Armor
+        createResistance[SPELL_SCHOOL_NORMAL] = petlevel*50;
     }
 
-    // Resistance
-    for (uint8 i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-        SetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + i), BASE_VALUE, float(cinfo->resistance[i]));
-
-    //health, mana, armor and resistance
-    PetLevelInfo const* pInfo = sObjectMgr->GetPetLevelInfo(creature_ID, petlevel);
-    if (pInfo)                                      // exist in DB
-    {
-        SetCreateHealth(pInfo->health);
-        if (petType != HUNTER_PET) //hunter pet use focus
-            SetCreateMana(pInfo->mana);
-
-        if (pInfo->armor > 0)
-            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
-
-        for (uint8 stat = 0; stat < MAX_STATS; ++stat)
-            SetCreateStat(Stats(stat), float(pInfo->stats[stat]));
-    }
-    else                                            // not exist in DB, use some default fake data
-    {
-        // remove elite bonuses included in DB values
-        CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(petlevel, cinfo->unit_class);
-        SetCreateHealth(stats->BaseHealth[cinfo->expansion]);
-        SetCreateMana(stats->BaseMana);
-
-        SetCreateStat(STAT_STRENGTH, 22);
-        SetCreateStat(STAT_AGILITY, 22);
-        SetCreateStat(STAT_STAMINA, 25);
-        SetCreateStat(STAT_INTELLECT, 28);
-        SetCreateStat(STAT_SPIRIT, 27);
-    }
-
-    SetBonusDamage(0);
     switch (petType)
     {
         case SUMMON_PET:
-        {
-            //the damage bonus used for pets is either fire or shadow damage, whatever is higher
-            uint32 fire  = m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE);
-            uint32 shadow = m_owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW);
-            uint32 val  = (fire > shadow) ? fire : shadow;
-            SetBonusDamage(int32 (val * 0.15f));
-            //bonusAP += val * 0.57;
-
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
-
-            //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
             break;
-        }
         case HUNTER_PET:
-        {
-            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32(sObjectMgr->GetXPForLevel(petlevel)*PET_XP_FACTOR));
-            //these formula may not be correct; however, it is designed to be close to what it should be
-            //this makes dps 0.5 of pets level
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
-            //damage range is then petlevel / 2
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
-            //damage is increased afterwards as strength and pet scaling modify attack power
-            break;
-        }
-        default:
-        {
-            switch (GetEntry())
+            if (!pInfo)         //If no pet levelstats in DB - use 1 for default hunter pet
+                pInfo = sObjectMgr->GetPetLevelInfo(1, petlevel);
+            CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
+            if (cFamily && cFamily->minScale > 0.0f)
             {
-                case 510: // mage Water Elemental
-                {
-                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
-                    break;
-                }
-                case 1964: //force of nature
-                {
-                    if (!pInfo)
-                        SetCreateHealth(30 + 30*petlevel);
-                    float bonusDmg = m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_NATURE) * 0.15f;
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 2.5f - (petlevel / 2) + bonusDmg));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 2.5f + (petlevel / 2) + bonusDmg));
-                    break;
-                }
-                case 15352: //earth elemental 36213
-                {
-                    if (!pInfo)
-                        SetCreateHealth(100 + 120*petlevel);
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
-                    break;
-                }
-                case 15438: //fire elemental
-                {
-                    if (!pInfo)
-                    {
-                        SetCreateHealth(40*petlevel);
-                        SetCreateMana(28 + 10*petlevel);
-                    }
-                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.5f));
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel * 4 - petlevel));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel * 4 + petlevel));
-                    break;
-                }
-                case 19668: // Shadowfiend
-                {
-                    if (!pInfo)
-                    {
-                        SetCreateMana(28 + 10*petlevel);
-                        SetCreateHealth(28 + 30*petlevel);
-                    }
-                    int32 bonus_dmg = (int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)* 0.3f));
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + bonus_dmg));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + bonus_dmg));
-
-                    break;
-                }
-                case 19833: //Snake Trap - Venomous Snake
-                {
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel / 2) - 25));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel / 2) - 18));
-                    break;
-                }
-                case 19921: //Snake Trap - Viper
-                {
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel / 2 - 10));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel / 2));
-                    break;
-                }
-                case 29264: // Feral Spirit
-                {
-                    if (!pInfo)
-                        SetCreateHealth(30*petlevel);
-
-                    float dmg_multiplier = 0.3f;
-                    if (m_owner->GetAuraEffect(63271, 0)) // Glyph of Feral Spirit
-                        dmg_multiplier = 0.6f;
-
-                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier));
-
-                    // 14AP == 1dps, wolf's strike speed == 2s so dmg = basedmg + AP / 14 * 2
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((petlevel * 4 - petlevel) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 2 / 14)));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((petlevel * 4 + petlevel) + (m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * dmg_multiplier * 2 / 14)));
-
-                    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(m_owner->GetArmor()) * 0.35f);  //  Bonus Armor (35% of player armor)
-                    SetModifierValue(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(m_owner->GetStat(STAT_STAMINA)) * 0.3f);  //  Bonus Stamina (30% of player stamina)
-                    if (!HasAura(58877))//prevent apply twice for the 2 wolves
-                        AddAura(58877, this);//Spirit Hunt, passive, Spirit Wolves' attacks heal them and their master for 150% of damage done.
-                    break;
-                }
-                case 31216: // Mirror Image
-                {
-                    SetBonusDamage(int32(m_owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
-                    SetDisplayId(m_owner->GetDisplayId());
-                    if (!pInfo)
-                    {
-                        SetCreateMana(28 + 30*petlevel);
-                        SetCreateHealth(28 + 10*petlevel);
-                    }
-                    break;
-                }
-                case 27829: // Ebon Gargoyle
-                {
-                    if (!pInfo)
-                    {
-                        SetCreateMana(28 + 10*petlevel);
-                        SetCreateHealth(28 + 30*petlevel);
-                    }
-                    // Impurity
-                    float impurityMod = 1.0f;
-                    if (Player * p_owner = m_owner->ToPlayer())
-                    {
-                        PlayerSpellMap playerSpells = p_owner->GetSpellMap();
-                        for (PlayerSpellMap::const_iterator itr = playerSpells.begin(); itr != playerSpells.end(); ++itr)
-                        {
-                            if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled)
-                                continue;
-                            switch (itr->first)
-                            {
-                                case 49220:
-                                case 49633:
-                                case 49635:
-                                case 49636:
-                                case 49638:
-                                {
-                                    if (const SpellInfo *proto = sSpellMgr->GetSpellInfo(itr->first))
-                                        AddFlatPctN(impurityMod, proto->Effects[0].CalcValue());
-                                }
-                                break;
-                            }
-                        }
-                    }
-                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f * impurityMod));
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
-                    break;
-                }
-                case 28017: // Bloodworms
-                {
-                    SetCreateHealth(4 * petlevel);
-                    SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f));
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - 30 - (petlevel / 4)));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)));
-                }
+                float scale;
+                if (getLevel() >= cFamily->maxScaleLevel)
+                    scale = cFamily->maxScale;
+                else if (getLevel() <= cFamily->minScaleLevel)
+                    scale = cFamily->minScale;
+                else
+                    scale = cFamily->minScale + float(getLevel() - cFamily->minScaleLevel) / cFamily->maxScaleLevel * (cFamily->maxScale - cFamily->minScale);
+                SetFloatValue(OBJECT_FIELD_SCALE_X, scale);
+                //UpdateModelData();
             }
+            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32(sObjectMgr->GetXPForLevel(getLevel()+1)*PET_XP_FACTOR));
+            setPowerType(POWER_FOCUS);
             break;
-        }
+        /*case GUARDIAN_PET:
+        case PROTECTOR_PET:
+        {
+            SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
+            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
+            break;
+        }*/
+    }
+
+    if (pInfo)                                       // exist in DB
+    {
+        if (pInfo->health)
+            SetCreateHealth(pInfo->health);
+        else
+            SetCreateHealth(createStats[MAX_STATS]);
+
+        if (pInfo->mana)
+            SetCreateMana(pInfo->mana);
+        else
+            SetCreateMana(createStats[MAX_STATS+1]);
+
+        if (pInfo->armor)
+            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
+        else
+            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(createResistance[SPELL_SCHOOL_NORMAL]));
+
+        for(uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+            if (pInfo->stats[i])
+               SetCreateStat(Stats(i), float(pInfo->stats[i]));
+            else
+               SetCreateStat(Stats(i), float(createStats[i]));
+
+        if (pInfo->attackpower)
+            SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(pInfo->attackpower));
+        else
+            SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(createStats[MAX_STATS+2]));
+
+        if (pInfo->mindmg)
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(pInfo->mindmg));
+        else
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(createStats[MAX_STATS+3]));
+
+        if (pInfo->maxdmg)
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(pInfo->maxdmg));
+        else
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(createStats[MAX_STATS+4]));
+
+        SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, float(createStats[MAX_STATS+5]));
+        SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, float(createStats[MAX_STATS+6]));
+
+        sLog->outDebug(LOG_FILTER_PETS, "Pet %u stats for level initialized (from pet_levelstat values)", cinfo->Entry);
+    }
+    else                                            // not exist in DB, use some default fake data
+    {
+        sLog->outDebug(LOG_FILTER_PETS, "Summoned pet (Entry: %u) not have pet stats data in DB. Use hardcoded values.",cinfo->Entry);
+        for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+            SetCreateStat(Stats(i), float(createStats[i]));
+
+        SetCreateHealth(createStats[MAX_STATS]);
+        SetCreateMana(createStats[MAX_STATS+1]);
+        SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(createResistance[SPELL_SCHOOL_NORMAL]));
+  
+        SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(createStats[MAX_STATS+2]));
+
+        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(createStats[MAX_STATS+3]));
+        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(createStats[MAX_STATS+4]));
+
+        SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, float(createStats[MAX_STATS+5]));
+        SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, float(createStats[MAX_STATS+6]));
+
+        sLog->outDebug(LOG_FILTER_PETS, "Pet %u stats for level initialized (from creature_template values)", cinfo->Entry);
+    }
+
+    for (uint8 i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
+        SetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + i), BASE_VALUE, float(createResistance[i]));
+ 
+    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_PCT, 1.0f);
+    SetAttackTime(OFF_ATTACK, BASE_ATTACK_TIME);
+    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
+ 
+    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+    {
+        //if (petType != HUNTER_PET)
+        //    LoadCreaturesAddon(true); // this just doesn't works :(
+        CastPetPassiveAuras(true);
+        CalculateScalingData(true);
+        ApplyAllScalingBonuses(true);
     }
 
     UpdateAllStats();
@@ -1194,8 +1166,17 @@ void Pet::_SaveSpellCooldowns(SQLTransaction& trans)
 
 void Pet::_LoadSpells()
 {
+    uint8 spec = 0;
+    if (getPetType() == HUNTER_PET)
+    {
+        Unit* owner = GetOwner();
+        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+            spec = ((Player*)owner)->GetActiveSpec();
+    }
+
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_SPELL);
     stmt->setUInt32(0, m_charmInfo->GetPetNumber());
+    stmt->setUInt32(1, spec);
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
     if (result)
@@ -1212,6 +1193,14 @@ void Pet::_LoadSpells()
 
 void Pet::_SaveSpells(SQLTransaction& trans)
 {
+    uint8 spec = 0;
+    if (getPetType() == HUNTER_PET)
+    {
+        Unit* owner = GetOwner();
+        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+            spec = ((Player*)owner)->GetActiveSpec();
+    }
+
     for (PetSpellMap::iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
     {
         ++next;
@@ -1228,6 +1217,7 @@ void Pet::_SaveSpells(SQLTransaction& trans)
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_PET_SPELL_BY_SPELL);
                 stmt->setUInt32(0, m_charmInfo->GetPetNumber());
                 stmt->setUInt32(1, itr->first);
+                stmt->setUInt32(2, spec);
                 trans->Append(stmt);
 
                 m_spells.erase(itr);
@@ -1236,12 +1226,14 @@ void Pet::_SaveSpells(SQLTransaction& trans)
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_PET_SPELL_BY_SPELL);
                 stmt->setUInt32(0, m_charmInfo->GetPetNumber());
                 stmt->setUInt32(1, itr->first);
+                stmt->setUInt32(2, spec);
                 trans->Append(stmt);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_PET_SPELL);
                 stmt->setUInt32(0, m_charmInfo->GetPetNumber());
                 stmt->setUInt32(1, itr->first);
                 stmt->setUInt8(2, itr->second.active);
+                stmt->setUInt32(3, spec);
                 trans->Append(stmt);
 
                 break;
@@ -1250,6 +1242,7 @@ void Pet::_SaveSpells(SQLTransaction& trans)
                 stmt->setUInt32(0, m_charmInfo->GetPetNumber());
                 stmt->setUInt32(1, itr->first);
                 stmt->setUInt8(2, itr->second.active);
+                stmt->setUInt32(3, spec);
                 trans->Append(stmt);
                 break;
             case PETSPELL_UNCHANGED:
@@ -1917,6 +1910,8 @@ bool Pet::IsPermanentPetFor(Player* owner)
                     return GetCreatureTemplate()->type == CREATURE_TYPE_DEMON;
                 case CLASS_DEATH_KNIGHT:
                     return GetCreatureTemplate()->type == CREATURE_TYPE_UNDEAD;
+                case CLASS_MAGE:
+                    return GetCreatureTemplate()->Entry == 37994;
                 default:
                     return false;
             }
@@ -2056,4 +2051,145 @@ void Pet::SynchronizeLevelWithOwner()
         default:
             break;
     }
+}
+
+void Pet::RegenerateHealth(uint32 diff)
+{
+    uint32 curValue = GetHealth();
+    uint32 maxValue = GetMaxHealth();
+
+    if (curValue >= maxValue)
+        return;
+
+    float addvalue = 0.0f;
+    float HealthIncreaseRate = sWorld->getRate(RATE_HEALTH);
+
+    // polymorphed case
+    if ( IsPolymorphed() )
+        addvalue = (float)GetMaxHealth() / 3.0f;
+    // normal regen case (maybe partly in combat case)
+    else if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) )
+    {
+        addvalue = OCTRegenHPPerSpirit() * HealthIncreaseRate;
+        if (!isInCombat())
+        {
+            uint32 amount = 0;
+            Unit::AuraEffectList const& mModHealthRegenPct = GetAuraEffectsByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
+            for (Unit::AuraEffectList::const_iterator itr = mModHealthRegenPct.begin(); itr != mModHealthRegenPct.end(); ++itr)
+            {
+                SpellInfo const *spellproto = (*itr)->GetSpellInfo();
+
+                if (!spellproto)
+                    continue;
+            
+                if (spellproto->AttributesEx4 & SPELL_ATTR4_IS_PET_SCALING)
+                {
+                    amount = (*itr)->GetAmount();
+                    break;
+                }
+            }
+            addvalue *= (100.0f + amount) / 100.0f;
+        }
+        else if (HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
+            addvalue *= GetTotalAuraModifier(SPELL_AURA_MOD_REGEN_DURING_COMBAT) / 100.0f;
+    }
+    // always regeneration bonus (including combat)
+    addvalue += GetTotalAuraModifier(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT);
+
+    if (addvalue < 0)
+        addvalue = 0;
+
+    addvalue *= (float)diff / 2000; //REGEN_TIME_FULL;
+
+    ModifyHealth(int32(addvalue));
+}
+
+void Pet::ApplyHappinessBonus(bool apply)
+{
+    if (!IsInWorld())
+        return;
+
+    if (GetHappinessState() == m_HappinessState)
+        return;
+    else
+        m_HappinessState = GetHappinessState();
+
+    if (apply)
+    {
+        RemoveAurasDueToSpell(8875);
+        int32 basePoints = 0;
+        switch (HappinessState(m_HappinessState))
+        {
+            case HAPPY:
+                // 125% of normal damage
+                basePoints = 25;
+                break;
+            case CONTENT:
+                // 100% of normal damage, nothing to modify
+                basePoints = 0;
+                break;
+            case UNHAPPY:
+                // 75% of normal damage
+                basePoints = -25;
+                break;
+            default:
+                basePoints = 0;
+                break;
+        }
+
+        CastCustomSpell(this, 8875, &basePoints, NULL, NULL, true);
+
+        UpdateDamagePhysical(BASE_ATTACK);
+        UpdateDamagePhysical(RANGED_ATTACK);
+        UpdateSpellPower();
+    }
+}
+
+float Pet::OCTRegenHPPerSpirit()
+{
+    Unit* owner = GetOwner();
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+        return ( GetPower(POWER_MANA) > 0 ) ? (GetStat(STAT_SPIRIT) * 0.25f) : (GetStat(STAT_SPIRIT) * 0.80f);
+
+    uint32 level = ((Player*)owner)->getLevel();
+    uint32 pclass = ((Player*)owner)->getClass();
+
+    if (level > GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+
+    GtOCTRegenHPEntry     const *baseRatio = sGtOCTRegenHPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+    GtRegenHPPerSptEntry  const *moreRatio = sGtRegenHPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+
+    if (baseRatio == NULL || moreRatio == NULL)
+        return 0.0f;
+
+    // Formula from PaperDollFrame script
+    float spirit = GetStat(STAT_SPIRIT);
+    float baseSpirit = spirit;
+    if (baseSpirit > 50) baseSpirit = 50;
+    float moreSpirit = spirit - baseSpirit;
+    float regen = baseSpirit * baseRatio->ratio + moreSpirit * moreRatio->ratio;
+    return regen;
+}
+
+float Pet::OCTRegenMPPerSpirit()
+{
+    Unit* owner = GetOwner();
+
+    if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+        return ((GetStat(STAT_SPIRIT) / 5.0f + 17.0f)/sqrt(GetStat(STAT_INTELLECT)));
+
+    uint32 level = ((Player*)owner)->getLevel();
+    uint32 pclass = ((Player*)owner)->getClass();
+
+    if (level > GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+
+    GtRegenMPPerSptEntry  const *moreRatio = sGtRegenMPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+
+    if (moreRatio == NULL)
+        return 0.0f;
+
+    // Formula get from PaperDollFrame script
+    float spirit    = GetStat(STAT_SPIRIT);
+    float regen     = spirit * moreRatio->ratio;
+    return regen;
 }
