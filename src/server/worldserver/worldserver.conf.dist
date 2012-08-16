@@ -1,6 +1,6 @@
-################################################
-# Trinity Core World Server configuration file #
-################################################
+###############################################
+# Battle Core World Server configuration file #
+###############################################
 [worldserver]
 
 ###################################################################################################
@@ -61,7 +61,7 @@ RealmID = 1
 #        Example:     "@prefix@/share/trinitycore"
 #        Default:     "."
 
-DataDir = "."
+DataDir = "./data"
 
 #
 #    LogsDir
@@ -70,7 +70,7 @@ DataDir = "."
 #                     Logs directory must exists, or log file creation will be disabled.
 #        Default:     "" - (Log files will be stored in the current path)
 
-LogsDir = ""
+LogsDir = "./logs"
 
 #
 #    LoginDatabaseInfo
@@ -87,9 +87,9 @@ LogsDir = ""
 #                     "127.0.0.1;3306;trinity;trinity;world"      - (WorldDatabaseInfo)
 #                     "127.0.0.1;3306;trinity;trinity;characters" - (CharacterDatabaseInfo)
 
-LoginDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;auth"
-WorldDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;world"
-CharacterDatabaseInfo = "127.0.0.1;3306;trinity;trinity;characters"
+LoginDatabaseInfo     = "127.0.0.1;3306;root;root;auth"
+WorldDatabaseInfo     = "127.0.0.1;3306;root;root;world"
+CharacterDatabaseInfo = "127.0.0.1;3306;root;root;characters"
 
 #
 #    LoginDatabase.WorkerThreads
@@ -179,7 +179,7 @@ Compression = 1
 #                     1+  - (Enabled)
 #                     0   - (Disabled, No limit)
 
-PlayerLimit = 100
+PlayerLimit = 800
 
 #
 #    SaveRespawnTimeImmediately
@@ -410,7 +410,7 @@ PidFile = ""
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-ChatLogs.Channel = 0
+ChatLogs.Channel = 1
 
 #
 #    ChatLogs.Whisper
@@ -418,7 +418,7 @@ ChatLogs.Channel = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-ChatLogs.Whisper = 0
+ChatLogs.Whisper = 1
 
 #
 #    ChatLogs.SysChan
@@ -426,7 +426,7 @@ ChatLogs.Whisper = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-ChatLogs.SysChan = 0
+ChatLogs.SysChan = 1
 
 #
 #    ChatLogs.Party
@@ -460,7 +460,7 @@ ChatLogs.Guild = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-ChatLogs.Public = 0
+ChatLogs.Public = 1
 
 #
 #    ChatLogs.Addon
@@ -1053,7 +1053,7 @@ ClientCacheVersion = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-Event.Announce = 0
+Event.Announce = 1
 
 #
 #    BeepAtStart
@@ -1070,7 +1070,7 @@ BeepAtStart = 1
 #        Example:     "Welcome to John\'s Server@This server runs on Trinity Core."
 #        Default:     "Welcome to a Trinity Core server."
 
-Motd = "Welcome to a Trinity Core server."
+Motd = "Welcome to freedom-wow server."
 
 #
 #    Server.LoginInfo
@@ -1463,7 +1463,7 @@ ListenRange.Yell = 300
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-ChatFakeMessagePreventing = 0
+ChatFakeMessagePreventing = 1
 
 #
 #    ChatStrictLinkChecking.Severity
@@ -1476,7 +1476,7 @@ ChatFakeMessagePreventing = 0
 #                         work correctly, please assure that you have extracted locale DBCs of
 #                         every language specific client playing on this server)
 
-ChatStrictLinkChecking.Severity = 0
+ChatStrictLinkChecking.Severity = 3
 
 #
 #    ChatStrictLinkChecking.Kick
@@ -1582,7 +1582,7 @@ PreserveCustomChannelDuration = 14
 # Default: 1 - (Enabled, Channels with flag CHANNEL_DBC_FLAG_CITY_ONLY will be activated in the cities only (blizzlike))
 # 0 - (Disabled, Channels with flag CHANNEL_DBC_FLAG_CITY_ONLY will connected at any place)
 
-Channel.CityOnlyFlag = 1
+Channel.CityOnlyFlag = 0
 
 #
 ###################################################################################################
@@ -1596,7 +1596,7 @@ Channel.CityOnlyFlag = 1
 #                     0 - (Disable)
 #                     1 - (Enable)
 
-GM.LoginState = 2
+GM.LoginState = 1
 
 #
 #    GM.Visible
@@ -1605,7 +1605,7 @@ GM.LoginState = 2
 #                     0 - (Invisible)
 #                     1 - (Visible)
 
-GM.Visible = 2
+GM.Visible = 0
 
 #
 #    GM.Chat
@@ -1614,7 +1614,7 @@ GM.Visible = 2
 #                     0 - (Disable)
 #                     1 - (Enable)
 
-GM.Chat = 2
+GM.Chat = 1
 
 #
 #    GM.WhisperingTo
@@ -1658,7 +1658,7 @@ GM.LogTrade = 1
 #        Description: GM character starting level.
 #        Default:     1
 
-GM.StartLevel = 1
+GM.StartLevel = 80
 
 #
 #    GM.AllowInvite
@@ -2089,7 +2089,7 @@ Die.Command.Mode = 1
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-AutoBroadcast.On = 0
+AutoBroadcast.On = 1
 
 #
 #    AutoBroadcast.Center
@@ -2098,14 +2098,14 @@ AutoBroadcast.On = 0
 #                     1 - (Notify)
 #                     2 - (Both)
 
-AutoBroadcast.Center = 0
+AutoBroadcast.Center = 2
 
 #
 #    AutoBroadcast.Timer
 #        Description: Timer (in milliseconds) for auto broadcasts.
 #        Default:     60000 - (60 seconds)
 
-AutoBroadcast.Timer = 60000
+AutoBroadcast.Timer = 360000
 
 #
 ###################################################################################################
@@ -2126,7 +2126,7 @@ Battleground.CastDeserter = 1
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-Battleground.QueueAnnouncer.Enable = 0
+Battleground.QueueAnnouncer.Enable = 1
 
 #
 #    Battleground.QueueAnnouncer.PlayerOnly
@@ -2134,7 +2134,7 @@ Battleground.QueueAnnouncer.Enable = 0
 #        Default:     0 - (System message, Anyone can see it)
 #                     1 - (Private, Only queued players can see it)
 
-Battleground.QueueAnnouncer.PlayerOnly = 0
+Battleground.QueueAnnouncer.PlayerOnly = 1
 
 #
 #    Battleground.InvitationType
@@ -2215,7 +2215,7 @@ Arena.RatedUpdateTimer = 5000
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-Arena.AutoDistributePoints = 0
+Arena.AutoDistributePoints = 1
 
 #
 #    Arena.AutoDistributeInterval
@@ -2223,7 +2223,7 @@ Arena.AutoDistributePoints = 0
 #                     distribution is enabled.
 #        Default:     7 - (Weekly)
 
-Arena.AutoDistributeInterval = 7
+Arena.AutoDistributeInterval = 1
 
 #
 #    Arena.QueueAnnouncer.Enable
@@ -2253,14 +2253,14 @@ Arena.ArenaSeason.InProgress = 1
 #        Description: Start rating for new arena teams.
 #        Default:     0
 
-Arena.ArenaStartRating = 0
+Arena.ArenaStartRating = 1500
 
 #
 #    Arena.ArenaStartPersonalRating
 #        Description: Start personal rating when joining a team.
 #        Default:     0
 
-Arena.ArenaStartPersonalRating = 0
+Arena.ArenaStartPersonalRating = 1500
 
 #
 #    Arena.ArenaStartMatchmakerRating
@@ -2397,7 +2397,7 @@ CharDelete.MinLevel = 0
 #        Default:     30 - (Enabled)
 #                     0  - (Disabled, Don't delete any characters)
 
-CharDelete.KeepDays = 30
+CharDelete.KeepDays = 360
 
 #
 ###################################################################################################
@@ -2524,7 +2524,7 @@ ShowMuteInWorld = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-ShowBanInWorld = 0
+ShowBanInWorld = 1
 
 #
 #     RecordUpdateTimeDiffInterval
@@ -2612,7 +2612,7 @@ PreventPlayersAccessToGMIsland = 0
 #        Default:     0 - (Disable)
 #                     1 - (Enable)
 
-Armory.Enable = 1
+Armory.Enable = 0
 
 #
 ###################################################################################################
@@ -2788,16 +2788,16 @@ OutdoorPvP.Wintergrasp.Antifarm.Def = 5
 #                          w - (Overwrite)
 #
 
-Appender.Console=1,3,0
-Appender.Server=2,2,0,Server.log,w
-Appender.GM=2,2,0,GM.log
-Appender.DBErrors=2,2,0,DBErrors.log
-Appender.Char=2,2,0,Char.log,w
+Appender.Console=1,3,0,13 11 9 5 3 1
+Appender.Server=2,2,8,Server.log,w
+Appender.GM=2,2,8,GM.log
+Appender.DBErrors=2,2,1,DBErrors.log
+Appender.Char=2,2,1,Char.log,w
 Appender.RA=2,2,0,RA.log
 Appender.Warden=2,2,0,Warden.log
-Appender.Chat=2,2,0,Chat.log
+Appender.Chat=2,2,8,Chat.log
 Appender.CharDump=2,2,0,%s.log
-Appender.Arenas=2,2,0,Arena.log
+Appender.Arenas=2,2,8,Arena.log
 Appender.SQLDev=2,2,0,SQLDev.log
 Appender.SQLDriver=2,2,0,SQLDriver.log
 
