@@ -30,6 +30,7 @@ void AddSC_npc_teleport();
 void AddSC_npc_hunterpetvendor();
 // Custom
 void AddSC_DuelReset();
+void AddSC_System_Censure();
 //NPC Transport Service
 void AddSC_npc_mount();	
 // Argent Tournament quest scripts
@@ -1294,5 +1295,6 @@ void AddCustomScripts()
     AddSC_npc_mount();		
     AddSC_ArgentTournament();
     AddSC_dalaran_squirrel();
+    AddSC_System_Censure();
 #endif
 }
