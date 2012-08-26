@@ -135,7 +135,7 @@ void GameObject::AddToWorld()
         sObjectAccessor->AddObject(this);
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
         // The state can be changed after GameObject::Create but before GameObject::AddToWorld
-        bool toggledState = GetGOData() ? GetGOData()->go_state == GO_STATE_READY : false;
+        bool toggledState = GetGOData() ? GetGOData()->go_state != GO_STATE_READY : false;
         if (m_model)
             GetMap()->InsertGameObjectModel(*m_model);
 
@@ -460,11 +460,6 @@ void GameObject::Update(uint32 diff)
                         // some traps do not have spell but should be triggered
                         if (goInfo->trap.spellId)
                             CastSpell(ok, goInfo->trap.spellId);
-
-                        // allow go to use wg script
-                        if (ok->GetTypeId() == TYPEID_PLAYER)
-                            if (sScriptMgr->OnGossipHello(ok->ToPlayer(), this))
-                                return;
 
                         m_cooldownTime = time(NULL) + goInfo->trap.cooldown ? goInfo->trap.cooldown :  uint32(4);   // template or 4 seconds
 
@@ -859,6 +854,13 @@ bool GameObject::IsDynTransport() const
     return gInfo->type == GAMEOBJECT_TYPE_MO_TRANSPORT || (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT && !gInfo->transport.pause);
 }
 
+bool GameObject::IsDestructibleBuilding() const
+{
+    GameObjectTemplate const* gInfo = GetGOInfo();
+    if (!gInfo) return false;
+    return gInfo->type == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING;
+}
+
 Unit* GameObject::GetOwner() const
 {
     return ObjectAccessor::GetUnit(*this, GetOwnerGUID());
@@ -875,7 +877,7 @@ bool GameObject::IsAlwaysVisibleFor(WorldObject const* seer) const
     if (WorldObject::IsAlwaysVisibleFor(seer))
         return true;
 
-    if (IsTransport())
+    if (IsTransport() || IsDestructibleBuilding())
         return true;
 
     if (!seer)
@@ -1927,7 +1929,7 @@ void GameObject::SetLootState(LootState state, Unit* unit)
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
 
         // Use the current go state
-        if (GetGoState() != GO_STATE_ACTIVE)
+        if (GetGoState() != GO_STATE_READY)
             startOpen = !startOpen;
 
         if (state == GO_ACTIVATED || state == GO_JUST_DEACTIVATED)
@@ -1949,13 +1951,10 @@ void GameObject::SetGoState(GOState state)
         // startOpen determines whether we are going to add or remove the LoS on activation
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
 
-        if (GetGOData() && GetGOData()->go_state == GO_STATE_READY)
+        if (state != GO_STATE_READY)
             startOpen = !startOpen;
 
-        if (state == GO_STATE_ACTIVE || state == GO_STATE_ACTIVE_ALTERNATIVE)
-            EnableCollision(startOpen);
-        else if (state == GO_STATE_READY)
-            EnableCollision(!startOpen);
+        EnableCollision(startOpen);
     }
 }
 
