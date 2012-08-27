@@ -2688,8 +2688,6 @@ PreventPlayersAccessToGMIsland = 0
 
 Armory.Enable = 0
 
-#
-
 #     Anticheat.Enable
 #        Description: Enables or disables the Anticheat System functionality
 #        Default:     1 - (Enabled)
