@@ -23,9 +23,9 @@ void AddSC_example_escort();
 void AddSC_example_gossip_codebox();
 void AddSC_example_misc();
 void AddSC_example_commandscript();
+
 // Transmogrify
 void AddSC_transmogrify_script();
-
 //TeleNPC2
 void AddSC_npc_teleport();
 //Hunter Pet Vendor
@@ -33,6 +33,8 @@ void AddSC_npc_hunterpetvendor();
 // Custom
 void AddSC_DuelReset();
 void AddSC_System_Censure();
+// NPC Vip
+void AddSC_npc_title();
 //NPC Transport Service
 void AddSC_npc_mount();	
 // Argent Tournament quest scripts
@@ -1292,9 +1294,10 @@ void AddCustomScripts()
     AddSC_npc_hunterpetvendor();	
     // Custom
     AddSC_DuelReset();
+    AddSC_System_Censure();
+    AddSC_npc_title();
     AddSC_npc_mount();		
     AddSC_ArgentTournament();
     AddSC_dalaran_squirrel();
-    AddSC_System_Censure();
 #endif
 }
