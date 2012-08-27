@@ -40,20 +40,23 @@ void CheckMessage(Player* player, std::string& msg, uint32 lang, Player* /*recei
     std::string lower = msg;
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
  
-    std::string checks[8];
+    uint8 cheksSize = 10;
+    std::string checks[cheksSize];
     checks[0] ="http://";
     checks[1] =".com";
-    checks[2] =".net";
-    checks[3] =".org";
-    checks[4] =".ru";
-    checks[5] ="rondor";
+    checks[2] =".www";
+    checks[3] =".net";
+    checks[4] =".org";
+    checks[5] =".ru";
     checks[6] ="www.";
-    checks[7] =".biz";
-    for (int i = 0; i < 8; ++i)
+    checks[7] ="wow-";
+    checks[8] ="-wow";
+    checks[9] ="rondor";
+    for (int i = 0; i < cheksSize; ++i)
         if (lower.find(checks[i]) != std::string::npos)
         {
             msg = "";
-            ChatHandler(player).PSendSysMessage("Реклама запрещена ты попался голубчик теперь мы тебя забаним");         
+            ChatHandler(player).PSendSysMessage("Р РµРєР»Р°РјР° Р·Р°РїСЂРµС‰РµРЅР°!");         
             return;
         }
 } 
