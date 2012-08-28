@@ -36,8 +36,8 @@ enum Events
 };
 
 /****************************************SYLVANAS************************************/
-#define GOSSIP_SYLVANAS_ITEM    "What would you have of me, Banshee Queen?"
-#define GOSSIP_JAINA_ITEM       "What would you have of me, my lady?"
+#define GOSSIP_SYLVANAS_ITEM    "Что вы хотели от меня, Леди Сильвана Ветрокрыла?"
+#define GOSSIP_JAINA_ITEM       "Что вы хотели, моя госпожа?"
 
 enum Yells
 {
