@@ -41,7 +41,7 @@ EndContentData */
 ## npc_beaten_corpse
 ######*/
 
-#define GOSSIP_CORPSE "Examine corpse in detail..."
+#define GOSSIP_CORPSE "Изучить труп подробнее ..."
 
 enum BeatenCorpse
 {
