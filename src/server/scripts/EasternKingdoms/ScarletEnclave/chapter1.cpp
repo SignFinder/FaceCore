@@ -335,7 +335,7 @@ public:
 ## npc_death_knight_initiate
 ######*/
 
-#define GOSSIP_ACCEPT_DUEL      "I challenge you, death knight!"
+#define GOSSIP_ACCEPT_DUEL      "Я выбираю тебя, Рыцарь Смерти!"
 
 enum eDuelEnums
 {
