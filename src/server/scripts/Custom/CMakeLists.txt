@@ -17,6 +17,7 @@ set(scripts_STAT_SRCS
   Custom/argent_tournament.cpp
   Custom/dalaran_squirrel.cpp
   Custom/chat_censure.cpp
+  Custom/npc_arena_teamTop.cpp
 )
 
 message("  -> Prepared: Custom")

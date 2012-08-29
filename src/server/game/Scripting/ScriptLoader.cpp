@@ -33,6 +33,7 @@ void AddSC_npc_hunterpetvendor();
 // Custom
 void AddSC_DuelReset();
 void AddSC_System_Censure();
+void AddSC_npc_arena_setup();
 // NPC Vip
 void AddSC_npc_title();
 //NPC Transport Service
@@ -1295,6 +1296,7 @@ void AddCustomScripts()
     // Custom
     AddSC_DuelReset();
     AddSC_System_Censure();
+    AddSC_npc_arena_setup();
     AddSC_npc_title();
     AddSC_npc_mount();		
     AddSC_ArgentTournament();
