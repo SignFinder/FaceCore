@@ -17749,12 +17749,10 @@ Item* Player::_LoadItem(SQLTransaction& trans, uint32 zoneId, uint32 timeDiff, F
         item = NewItemOrBag(proto);
         if (item->LoadFromDB(itemGuid, GetGUID(), fields, itemEntry))
         {
-<<<<<<< HEAD
+            PreparedStatement* stmt = NULL;
+
             //Transmogrification2
             item->SetUInt32Value(ITEM_FIELD_DISPLAY_ID, itemDisplayID);
-=======
-            PreparedStatement* stmt = NULL;
->>>>>>> 6f4e1e0860d427f440c0e85af259335a3e050238
 
             // Do not allow to have item limited to another map/zone in alive state
             if (isAlive() && item->IsLimitedToAnotherMapOrZone(GetMapId(), zoneId))
