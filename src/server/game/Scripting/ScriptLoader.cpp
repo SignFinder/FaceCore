@@ -34,6 +34,7 @@ void AddSC_npc_hunterpetvendor();
 // Custom
 void AddSC_DuelReset();
 void AddSC_System_Censure();
+void AddSC_npc_arena_setup();
 // NPC Vip
 void AddSC_npc_title();
 //NPC Transport Service
@@ -70,6 +71,7 @@ void AddSC_ban_commandscript();
 void AddSC_bf_commandscript();
 void AddSC_cast_commandscript();
 void AddSC_character_commandscript();
+void AddSC_cheat_commandscript();
 void AddSC_debug_commandscript();
 void AddSC_disable_commandscript();
 void AddSC_event_commandscript();
@@ -692,6 +694,7 @@ void AddCommandScripts()
     AddSC_bf_commandscript();
     AddSC_cast_commandscript();
     AddSC_character_commandscript();
+    AddSC_cheat_commandscript();
     AddSC_debug_commandscript();
     AddSC_disable_commandscript();
     AddSC_event_commandscript();
@@ -1299,6 +1302,7 @@ void AddCustomScripts()
     // Custom
     AddSC_DuelReset();
     AddSC_System_Censure();
+    AddSC_npc_arena_setup();
     AddSC_npc_title();
     AddSC_npc_mount();		
     AddSC_ArgentTournament();
