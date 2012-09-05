@@ -35,6 +35,7 @@ void AddSC_npc_hunterpetvendor();
 void AddSC_DuelReset();
 void AddSC_System_Censure();
 void AddSC_npc_arena_setup();
+void AddSC_DuelReset();
 // NPC Vip
 void AddSC_npc_title();
 //NPC Transport Service
@@ -1309,5 +1310,6 @@ void AddCustomScripts()
     AddSC_npc_mount();		
     AddSC_ArgentTournament();
     AddSC_dalaran_squirrel();
+    AddSC_DuelReset();
 #endif
 }

@@ -26,6 +26,7 @@
 #    CONSOLE AND REMOTE ACCESS
 #    CHARACTER DELETE OPTIONS
 #    CUSTOM SERVER OPTIONS
+#    DUEL RESET COOLDOWN
 #    LOGGING SYSTEM SETTINGS
 #
 ###################################################################################################
@@ -2722,6 +2723,52 @@ Anticheat.DetectionsEnabled = 31
 
 Anticheat.MaxReportsForDailyReport = 70
 
+###################################################################################################
+
+###################################################################################################
+# DUEL RESET COOLDOWN
+#
+#     DuelReset.Cooldown.OnStart
+#     Reseting cooldown and restore health to start of duel.
+#     Default: 0 - Disable
+#              1 - Enable
+#
+
+DuelReset.Cooldown.OnStart = 1
+
+#     DuelReset.Cooldown.OnFinish 
+#     Reseting cooldown and restore health to finish of duel.
+#     Default: 0 - Disable
+#              1 - Enable
+# 
+
+DuelReset.Cooldown.OnFinish = 1
+
+#     DuelReset.Cooldown.Only.in.Elwynn.and.Durotar
+#     Reseting cooldown only in Elwynn forest and Durotar locations.
+#     Default: 0 - Disable
+#              1 - Enable
+#
+
+DuelReset.Cooldown.Only.in.Elwynn.and.Durotar = 0
+
+#     DuelReset.Cooldown.Max.Energy.OnStart
+#     Sets rage, mana and runic power to max on duel start.
+#     Default: 0 - Disable
+#              1 - Enable
+#
+
+DuelReset.Cooldown.Max.Energy.OnStart = 0
+
+#     DuelReset.Cooldown.Reset.Energy.OnStart
+#     Resets rage and runic power on duel start.
+#     Default: 0 - Disable
+#              1 - Enable
+#
+
+DuelReset.Cooldown.Reset.Energy.OnStart = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################
