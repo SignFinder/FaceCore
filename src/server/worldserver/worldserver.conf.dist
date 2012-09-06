@@ -1595,6 +1595,12 @@ PreserveCustomChannelDuration = 14
 
 Channel.CityOnlyFlag = 0
 
+#     Chat.DisableWhenPlayerCreate
+#        Description: Disable chat for player who total played time not equal to X (in seconds)
+#        Default:     900 seconds   (equal to 15 minutes)
+ 
+Chat.DisableWhenPlayerCreate = 0
+
 #
 ###################################################################################################
 
@@ -1914,6 +1920,11 @@ Rate.Mining.Next = 1
 
 Rate.Talent = 1
 
+#     Chat.DisableWhenPlayerCreate
+#        Description: Disable chat for player who total played time not equal to X (in seconds)
+#        Default:     900 seconds   (equal to 15 minutes)
+ 
+Chat.DisableWhenPlayerCreate = 0
 #
 #    Rate.Reputation.Gain
 #        Description: Reputation gain rate.

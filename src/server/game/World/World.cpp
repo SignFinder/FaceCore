@@ -1229,6 +1229,9 @@ void World::LoadConfigSettings(bool reload)
     // misc
     m_bool_configs[CONFIG_PDUMP_NO_PATHS] = ConfigMgr::GetBoolDefault("PlayerDump.DisallowPaths", true);
     m_bool_configs[CONFIG_PDUMP_NO_OVERWRITE] = ConfigMgr::GetBoolDefault("PlayerDump.DisallowOverwrite", true);
+
+     // Disable Chat
+     m_int_configs[CONFIG_INT_CHAT_DISABLE_TIME]  = ConfigMgr::GetIntDefault("Chat.DisableWhenPlayerCreate", 60);
      
     //Reset Duel Cooldown
     m_bool_configs[CONFIG_DUEL_RESET_COOLDOWN_ON_START] = ConfigMgr::GetBoolDefault("DuelReset.Cooldown.OnStart", false);
