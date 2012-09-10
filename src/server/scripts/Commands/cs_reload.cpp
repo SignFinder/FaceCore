@@ -100,6 +100,7 @@ public:
             { "gm_tickets",                   SEC_ADMINISTRATOR, true,  &HandleReloadGMTicketsCommand,                  "", NULL },
             { "gossip_menu",                  SEC_ADMINISTRATOR, true,  &HandleReloadGossipMenuCommand,                 "", NULL },
             { "gossip_menu_option",           SEC_ADMINISTRATOR, true,  &HandleReloadGossipMenuOptionCommand,           "", NULL },
+            { "item_template",                SEC_ADMINISTRATOR, true,  &HandleReloadItemTemplateCommand,               "", NULL },
             { "item_enchantment_template",    SEC_ADMINISTRATOR, true,  &HandleReloadItemEnchantementsCommand,          "", NULL },
             { "item_loot_template",           SEC_ADMINISTRATOR, true,  &HandleReloadLootTemplatesItemCommand,          "", NULL },
             { "item_set_names",               SEC_ADMINISTRATOR, true,  &HandleReloadItemSetNamesCommand,               "", NULL },
@@ -936,6 +937,14 @@ public:
         sLog->outInfo(LOG_FILTER_GENERAL, "Re-Loading Page Texts...");
         sObjectMgr->LoadPageTexts();
         handler->SendGlobalGMSysMessage("DB table `page_texts` reloaded.");
+        return true;
+    }
+	
+    static bool HandleReloadItemTemplateCommand(ChatHandler* handler, const char* /*args*/)
+    {
+        sLog->outString("Re-Loading Item Prototypes... ");
+        sObjectMgr->LoadItemTemplates();
+        handler->SendGlobalGMSysMessage("DB table `item_template` reloaded.");
         return true;
     }
 
