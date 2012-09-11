@@ -942,7 +942,7 @@ public:
 	
     static bool HandleReloadItemTemplateCommand(ChatHandler* handler, const char* /*args*/)
     {
-        sLog->outString("Re-Loading Item Prototypes... ");
+        sLog->outInfo(LOG_FILTER_GENERAL, "Re-Loading Item Prototypes... ");
         sObjectMgr->LoadItemTemplates();
         handler->SendGlobalGMSysMessage("DB table `item_template` reloaded.");
         return true;
