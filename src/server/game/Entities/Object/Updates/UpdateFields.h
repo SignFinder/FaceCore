@@ -70,13 +70,8 @@ enum EItemFields
     ITEM_FIELD_DURABILITY                     = OBJECT_END + 0x0036, // Size: 1, Type: INT, Flags: OWNER, ITEM_OWNER
     ITEM_FIELD_MAXDURABILITY                  = OBJECT_END + 0x0037, // Size: 1, Type: INT, Flags: OWNER, ITEM_OWNER
     ITEM_FIELD_CREATE_PLAYED_TIME             = OBJECT_END + 0x0038, // Size: 1, Type: INT, Flags: PUBLIC
-<<<<<<< HEAD
     ITEM_FIELD_DISPLAY_ID                     = OBJECT_END + 0x0039, // Size: 1, Type: INT, Flags: PUBLIC
-    ITEM_END                                  = OBJECT_END + 0x003A,
-=======
-    ITEM_FIELD_PAD                            = OBJECT_END + 0x0039, // Size: 1, Type: INT, Flags: NONE
     ITEM_END                                  = OBJECT_END + 0x003A
->>>>>>> fc656d7700ebb6c65ef555032c4346f2c64c5795
 };
 
 enum EContainerFields
