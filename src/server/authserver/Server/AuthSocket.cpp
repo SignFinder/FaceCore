@@ -401,6 +401,7 @@ bool AuthSocket::_HandleLogonChallenge()
             if (!locked)
             {
                 //set expired bans to inactive
+                LoginDatabase.Execute(LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_PREMIUM));
                 LoginDatabase.Execute(LoginDatabase.GetPreparedStatement(LOGIN_UPD_EXPIRED_ACCOUNT_BANS));
 
                 // If the account is banned, reject the logon attempt
