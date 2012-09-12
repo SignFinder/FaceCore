@@ -847,6 +847,13 @@ InstantLogout = 1
 DisableWaterBreath = 4
 
 #
+#    Enable or Disable "Fatigue" timer
+#           default = 1 (enabled)
+#                   = 0 (disabled)
+
+fatigue.enabled = 1
+
+#
 #    AllFlightPaths
 #        Description: Character knows all flight paths (of both factions) after creation.
 #        Default:     0 - (Disabled)
