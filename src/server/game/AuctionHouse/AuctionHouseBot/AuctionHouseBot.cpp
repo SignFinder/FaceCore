@@ -965,7 +965,7 @@ void AuctionHouseBot::Initialize()
 
 
 			results = WorldDatabase.PQuery("SELECT entry FROM item_template WHERE class = 16 AND RequiredLevel >= %u AND RequiredLevel <= %u", DisableGlyphBelowLevel, DisableGlyphAboveLevel);
-			if (results != NULL)
+			if (results > NULL && results < NULL)
 			{
 				do
 				{
