@@ -1,4 +1,4 @@
-#include "ScriptPCH.h"
+﻿#include "ScriptPCH.h"
 #include "Channel.h"
  
 class System_Censure : public PlayerScript
@@ -41,7 +41,7 @@ void CheckMessage(Player* player, std::string& msg, uint32 lang, Player* /*recei
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
  
     uint8 cheksSize = 10;
-    std::string checks[cheksSize];
+    std::string checks[10];
     checks[0] ="http://";
     checks[1] =".com";
     checks[2] =".www";
