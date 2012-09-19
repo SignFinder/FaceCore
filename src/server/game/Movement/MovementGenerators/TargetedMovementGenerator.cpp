@@ -78,7 +78,12 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner)
     owner->AddUnitState(UNIT_STATE_CHASE);
 
     Movement::MoveSplineInit init(owner);
+<<<<<<< HEAD
     init.MovebyPath(i_path->GetPath());
+=======
+    init.MoveTo(x,y,z);
+    init.SetFacing(i_target.getTarget());
+>>>>>>> fb66265fe5f17d0e34e2acd5cd8c7480b8d00948
     init.SetWalk(((D*)this)->EnableWalking());
     init.Launch();
 }
