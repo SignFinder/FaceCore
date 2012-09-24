@@ -23,6 +23,11 @@
 #    BATTLEFIELD CONFIG
 #    ARENA CONFIG
 #    NETWORK CONFIG
+#    AUCTION HOUSE BOT SETTINGS
+#    AUCTION HOUSE BOT FILTERS PART 1
+#    AUCTION HOUSE BOT FILTERS PART 2
+#    AUCTION HOUSE BOT FILTERS PART 3
+#    AUCTION HOUSE BOT GLYPHS PART
 #    CONSOLE AND REMOTE ACCESS
 #    CHARACTER DELETE OPTIONS
 #    CUSTOM SERVER OPTIONS
@@ -2924,7 +2929,7 @@ ShowMuteInWorld = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-ShowBanInWorld = 1
+ShowBanInWorld = 0
 
 #
 #     RecordUpdateTimeDiffInterval
