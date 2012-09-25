@@ -344,6 +344,8 @@ enum WorldIntConfigs
     CONFIG_WINTERGRASP_NOBATTLETIME,
     CONFIG_WINTERGRASP_RESTART_AFTER_CRASH,
     CONFIG_INT_CHAT_DISABLE_TIME,
+    CONFIG_EXTERNAL_MAIL_ENABLE,
+    CONFIG_EXTERNAL_MAIL_INTERVAL,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -835,6 +837,7 @@ class World
         time_t m_startTime;
         time_t m_gameTime;
         IntervalTimer m_timers[WUPDATE_COUNT];
+        IntervalTimer extmail_timer;
         time_t mail_timer;
         time_t mail_timer_expires;
         uint32 m_updateTime, m_updateTimeSum;

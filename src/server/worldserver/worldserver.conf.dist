@@ -30,6 +30,7 @@
 #    AUCTION HOUSE BOT GLYPHS PART
 #    CONSOLE AND REMOTE ACCESS
 #    CHARACTER DELETE OPTIONS
+#    EXTERNAL MAIL OPTIONS
 #    CUSTOM SERVER OPTIONS
 #    DUEL RESET COOLDOWN
 #    ANTI REKLAMA CONFIG
@@ -2774,6 +2775,25 @@ SOAP.IP = "127.0.0.1"
 #        Default:     7878
 
 SOAP.Port = 7878
+
+#
+###################################################################################################
+
+###################################################################################################
+# EXTERNAL MAIL OPTIONS
+#
+#    External.Mail.Enable
+#        Enable external mail delivery from mail_external table.
+#        Default: 0 (disabled)
+#                 1 (enabled)
+#
+#    External.Mail.Interval
+#        Mail delivery delay time for item sending from mail_external table, in minutes.
+#        Default: 5 minutes
+#
+
+External.Mail.Enable = 1
+External.Mail.Interval = 5
 
 #
 ###################################################################################################
