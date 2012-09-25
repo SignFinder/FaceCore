@@ -32,3 +32,4 @@
 
 2012-09-25 John Doe <vitasic-pokataev@yandex.ru>
 * Добавлена реализация команды перезагрузки таблиц item_template и locales_item
+* Добавлена Имплементация Наблюдателей арены

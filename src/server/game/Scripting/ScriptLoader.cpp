@@ -36,6 +36,7 @@ void AddSC_DuelReset();
 void AddSC_reklama();
 void AddSC_npc_arena_setup();
 void AddSC_DuelReset();
+void AddSC_arena_spectator_script();
 // NPC Vip
 void AddSC_npc_title();
 //NPC Transport Service
@@ -1315,5 +1316,6 @@ void AddCustomScripts()
     AddSC_ArgentTournament();
     AddSC_dalaran_squirrel();
     AddSC_DuelReset();
+    AddSC_arena_spectator_script();
 #endif
 }

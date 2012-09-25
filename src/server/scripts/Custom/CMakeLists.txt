@@ -19,6 +19,7 @@ set(scripts_STAT_SRCS
   Custom/anti_reklama.cpp
   Custom/npc_arena_teamTop.cpp
   Custom/duel_reset.cpp
+  Custom/arena_spectator.cpp
 )
 
 message("  -> Prepared: Custom")
