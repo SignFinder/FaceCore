@@ -16,7 +16,7 @@ set(scripts_STAT_SRCS
   Custom/npc_mount.cpp 
   Custom/argent_tournament.cpp
   Custom/dalaran_squirrel.cpp
-  Custom/anti_reklama.cpp
+  Custom/chat_censure.cpp
   Custom/npc_arena_teamTop.cpp
   Custom/duel_reset.cpp
   Custom/arena_spectator.cpp
