@@ -16,6 +16,7 @@ INSERT INTO `command` (`name`, `security`, `help`) VALUES ('spectate reset', 0, 
 
 UPDATE `gameobject_template` SET `flags` = 36 WHERE `entry` IN (185918, 185917, 183970, 183971, 183972, 183973, 183977, 183979, 183978, 183980);
 
+/* Арена спектатор */
 DELETE FROM `creature_template` WHERE entry = 190000; 
 INSERT INTO `creature_template` (`entry`, `modelid1`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `Health_mod`, `Mana_mod`, `Armor_mod`, `faction_A`, `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `dmg_multiplier`, `unit_class`, `unit_flags`, `type`, `type_flags`, `InhabitType`, `RegenHealth`, `flags_extra`, `ScriptName`) VALUES 
 (190000, 29348, 'Arena Spectator', 'Use addon!', 'Speak', 50000, 71, 71, 1.56, 1.56, 1.56, 35, 35, 3, 1, 1.14286, 1.25, 1, 1, 1, 2, 7, 138936390, 3, 1, 2, 'npc_arena_spectator');

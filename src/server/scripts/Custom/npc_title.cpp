@@ -6,7 +6,7 @@ REPLACE INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_ent
 #include "ScriptPCH.h"
 #include "ScriptMgr.h"
 
-#define MSG_GOSSIP_TEXT_GETTING_STARTED	"Приветствуем вас на сервере Freedom-WoW!"
+#define MSG_GOSSIP_TEXT_GETTING_STARTED	"Приветствуем вас на сервере WoW!"
 
 #define MSG_ERR_ARENA_POINT "У вас не достаточно Апа!"
 #define MSG_ERR_TITLE "У данного персонажа уже есть такое звание!"
