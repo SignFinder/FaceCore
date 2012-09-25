@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 SliceCore <https://github.com/Vitasic/BattleCore/>
+ * Copyright (C) 2012 SliceCore <https://github.com/Neket007/SliceCore>
  */
 
 #include "ScriptPCH.h"
