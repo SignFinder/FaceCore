@@ -33,7 +33,7 @@ void AddSC_npc_teleport();
 void AddSC_npc_hunterpetvendor();
 // Custom
 void AddSC_DuelReset();
-void AddSC_System_Censure();
+void AddSC_reklama();
 void AddSC_npc_arena_setup();
 void AddSC_DuelReset();
 // NPC Vip
@@ -1308,7 +1308,7 @@ void AddCustomScripts()
     AddSC_npc_hunterpetvendor();	
     // Custom
     AddSC_DuelReset();
-    AddSC_System_Censure();
+    AddSC_reklama();
     AddSC_npc_arena_setup();
     AddSC_npc_title();
     AddSC_npc_mount();		
