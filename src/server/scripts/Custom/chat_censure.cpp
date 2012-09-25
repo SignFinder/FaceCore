@@ -40,8 +40,8 @@ void CheckMessage(Player* player, std::string& msg, uint32 lang, Player* /*recei
     std::string lower = msg;
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
  
-    uint8 cheksSize = 10;
-    std::string checks[cheksSize];
+    uint8 cheksSize = 27;
+    std::string checks[27];
     checks[0] ="http://";
     checks[1] =".com";
     checks[2] =".www";
@@ -52,6 +52,23 @@ void CheckMessage(Player* player, std::string& msg, uint32 lang, Player* /*recei
     checks[7] ="wow-";
     checks[8] ="-wow";
     checks[9] ="rondor";
+    checks[10] ="no-ip";
+    checks[11] =".zapto";
+    checks[12] ="wow-cool";
+    checks[13] ="elgracia";
+    checks[14] ="spzone";
+    checks[15] ="fakewow";
+    checks[16] ="deathside";
+    checks[17] ="warsong";
+    checks[18] ="RiverRise";
+    checks[19] ="air-world";
+    checks[20] =".lt";
+    checks[21] ="sirus";
+    checks[22] ="backkor";
+    checks[23] ="isengard";
+    checks[24] ="wowcircle";
+    checks[25] ="izbooshka";
+    checks[26] ="magic";
     for (int i = 0; i < cheksSize; ++i)
         if (lower.find(checks[i]) != std::string::npos)
         {
