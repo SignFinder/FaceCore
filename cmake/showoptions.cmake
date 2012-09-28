@@ -1,10 +1,10 @@
 # output generic information about the core and buildtype chosen
 message("")
-message("* BattleCore(pa) rev. hash  : ${rev_hash}")
-message("* BattleCore(pa) rev. date  : ${rev_date}")
+message("* LanCore rev. hash  : ${rev_hash}")
+message("* LanCore rev. date  : ${rev_date}")
 
 if( UNIX )
-  message("* BattleCore(pa) buildtype  : ${CMAKE_BUILD_TYPE}")
+  message("* LanCore(pa) buildtype  : ${CMAKE_BUILD_TYPE}")
 endif()
 message("")
 
