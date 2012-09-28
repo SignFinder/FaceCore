@@ -894,6 +894,14 @@ void Battleground::EndBattleground(uint32 winner)
         {
             if (team == winner)
             {
+             //custom reward
+             if (!isArena())
+             {
+              //Emblem of Frost x1
+              player->AddItem(49426, 1);
+              if (CanAwardArenaPoints())
+              player->ModifyArenaPoints(25);
+               }
                 // update achievement BEFORE personal rating update
                 uint32 rating = player->GetArenaPersonalRating(winner_arena_team->GetSlot());
                 player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, rating ? rating : 1);
