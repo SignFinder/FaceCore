@@ -1253,6 +1253,17 @@ AllowTwoSide.Interaction.Calendar = 0
 #                     1 - (Enabled)
 
 AllowTwoSide.Interaction.Chat = 0
+#
+#    AllowTwoSide.Interaction.Chat.Area
+#        Description: Allow say chat between factions on specific area.
+#        Default:    -1 - (Disabled)
+
+AllowTwoSide.Interaction.Chat.Area = 2397
+
+#
+#    AllowTwoSide.Interaction.Channel
+#        Description: Allow channel chat between factions.
+#        Default:    0 - (Disabled)
 
 #
 #    AllowTwoSide.Interaction.Channel
