@@ -24,7 +24,7 @@
 #include "Define.h"
 #include "revision.h"
 
-#define _PACKAGENAME "Core: BattleCore\nDeveloper: Vitasic\n"
+#define _PACKAGENAME "Core: LanCore\nDeveloper: Mojojojo\n"
 
 #if TRINITY_ENDIAN == TRINITY_BIGENDIAN
 # define _ENDIAN_STRING "big-endian"
@@ -34,11 +34,10 @@
 
 #if PLATFORM == PLATFORM_WINDOWS
 # ifdef _WIN64
-#  define _FULLVERSION _PACKAGENAME "Rev. " VER_PRODUCTVERSION_STR " (Win64, "_BUILD_DIRECTIVE ")"
+#  define _PACKAGENAME 
 # else
-#  define _FULLVERSION _PACKAGENAME "Rev. " VER_PRODUCTVERSION_STR " (Win32, " _BUILD_DIRECTIVE ")"
-# endif
+#  define _PACKAGENAME 
 #else
-#  define _FULLVERSION _PACKAGENAME "Rev. " VER_PRODUCTVERSION_STR " (Unix, " _BUILD_DIRECTIVE ")"
+#  define _PACKAGENAME 
 #endif
 #endif
