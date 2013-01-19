@@ -44,3 +44,5 @@ the doc directory.
 SQL files to create the database can be found in the sql directory. Files
 to update your database from an older revision/version can be found in the
 sql/updates directory.
+
+Scriu orice ca sa vada Sisif !
