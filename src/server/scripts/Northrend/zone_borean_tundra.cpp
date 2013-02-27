@@ -322,7 +322,7 @@ public:
                 check_Timer = 30000;
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if(!me->IsVehicle())
                 return;

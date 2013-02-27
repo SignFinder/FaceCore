@@ -115,7 +115,7 @@ public:
                 check_Timer = 30000;
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if(!me->IsVehicle())
                 return;
@@ -191,7 +191,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if(part > 4 || me->isDead())
                 return;
@@ -285,7 +285,7 @@ public:
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if(Explote_Timer <= diff)
             {
@@ -382,7 +382,7 @@ public:
                 WaitTimer = 1;
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
 
                 if (WaitTimer == 1)
@@ -509,7 +509,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             npc_escortAI::UpdateAI(diff);
 
@@ -730,7 +730,7 @@ public:
             check_Timer = 2000;
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if(check_Timer <= diff)
             {
@@ -806,7 +806,7 @@ public:
                 check_Timer = 30000;
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if(!me->IsVehicle())
                 return;

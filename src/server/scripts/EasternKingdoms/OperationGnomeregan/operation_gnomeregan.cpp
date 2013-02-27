@@ -159,7 +159,7 @@ class npc_og_suit : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 npc_escortAI::UpdateAI(diff);
             }
@@ -325,7 +325,7 @@ class npc_og_infantry : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 npc_escortAI::UpdateAI(diff);
 
@@ -489,7 +489,7 @@ class npc_og_tank : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 npc_escortAI::UpdateAI(diff);
 
@@ -577,7 +577,7 @@ class npc_og_i_tank : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 npc_escortAI::UpdateAI(diff);
 
@@ -651,7 +651,7 @@ class npc_og_assistants : public CreatureScript
             }
 
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 npc_escortAI::UpdateAI(diff);
 
@@ -846,7 +846,7 @@ class npc_og_mekkatorque : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 //DoRefreshWorldStates();
 
@@ -1673,7 +1673,7 @@ class npc_og_boltcog : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 npc_escortAI::UpdateAI(diff);
 
@@ -1762,7 +1762,7 @@ class npc_og_cannon : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim())
                     return;
@@ -1916,7 +1916,7 @@ class npc_og_i_infantry : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim())
                     return;

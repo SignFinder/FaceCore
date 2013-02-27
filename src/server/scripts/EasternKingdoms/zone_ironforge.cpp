@@ -231,7 +231,7 @@ class npc_gnome_citizen : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 Unit* owner = me->GetOwner();
 
@@ -336,7 +336,7 @@ class npc_steamcrank : public CreatureScript
                 }
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 if (_stepTimer <= diff)
                 {
@@ -530,7 +530,7 @@ class npc_mekkatorque : public CreatureScript
                 me->DespawnOrUnsummon();
             }
 
-            void UpdateAI(const uint32 diff)
+            void UpdateAI(uint32 diff)
             {
                 if (_stepTimer <= diff)
                 {

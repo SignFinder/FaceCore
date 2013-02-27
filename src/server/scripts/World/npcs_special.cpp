@@ -2743,7 +2743,7 @@ public:
         uint32 m_current_pennant;
         uint32 check_timer;
 
-        void UpdateAI(const uint32 uiDiff)
+        void UpdateAI(uint32 uiDiff)
         {
             // have to delay the check otherwise it wont work
             if (check_timer && (check_timer <= uiDiff))

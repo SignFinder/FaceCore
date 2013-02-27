@@ -754,7 +754,7 @@ public:
             }
         }
  
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (!IsHolidayActive(HOLIDAY_BREWFEST))
                 return;
@@ -891,7 +891,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 const diff)
+        void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
                 return;
@@ -1052,7 +1052,7 @@ public:
                 target->CastSpell(target, SPELL_CONSUME_BREW, true);
         }
 
-        void UpdateAI(uint32 const diff)
+        void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
                 return;
