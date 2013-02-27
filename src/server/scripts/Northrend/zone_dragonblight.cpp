@@ -682,7 +682,7 @@ public:
             check_Timer = 2000;
         }
 
-        void SpellHitTarget(Unit *target, const SpellEntry *spell)
+        void SpellHitTarget(Unit *target, const SpellInfo *spell)
         {
             if(spell->Id == SPELL_DESTURCTION_TRIGGER)
             {

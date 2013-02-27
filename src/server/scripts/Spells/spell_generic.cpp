@@ -1525,7 +1525,7 @@ class spell_gen_ribbon_pole_dancer_check : public SpellScriptLoader
         {
             PrepareAuraScript(spell_gen_ribbon_pole_dancer_check_AuraScript);
 
-            bool Validate(SpellEntry const* /*spell*/)
+            bool Validate(SpellInfo const* /*spell*/)
             {
                 if (!sSpellStore.LookupEntry(SPELL_HAS_FULL_MIDSUMMER_SET))
                     return false;

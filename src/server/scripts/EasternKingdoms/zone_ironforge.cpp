@@ -219,7 +219,7 @@ class npc_gnome_citizen : public CreatureScript
                     me->DespawnOrUnsummon();
             }
 
-            void SpellHit(Unit* caster, SpellEntry const* spell)
+            void SpellHit(Unit* caster, SpellInfo const* spell)
             {
                 if (spell->Id == SPELL_AOE_TURNIN && caster->GetEntry() == NPC_SPARKNOZZLE && !_complete)
                 {
@@ -662,7 +662,7 @@ class spell_motivate_a_tron : public SpellScriptLoader
         class spell_motivate_a_tron_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_motivate_a_tron_SpellScript)
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
                 if (!sSpellStore.LookupEntry(SPELL_MOTIVATE_1))
                     return false;
