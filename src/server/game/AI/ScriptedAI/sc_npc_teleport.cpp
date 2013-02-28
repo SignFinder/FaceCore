@@ -148,7 +148,7 @@ bool TELE::IsAllowedToTeleport(Player * const player) const
         return player->getClass() == m_data0;
 
       case FLAG_REPUTATION:
-        return player->GetReputationRank(m_data0) >= m_data1;
+        return player->GetReputationRank(m_data0) >= ReputationRank(m_data1);
 
       case FLAG_PLAYER:
         return player->GetGUID() == m_data0;

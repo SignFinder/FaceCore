@@ -877,7 +877,7 @@ public:
 
             if (Creature *cC = pCreature->FindNearestCreature(NPC_HIGH_ABBOT_LANDGREN_ENTRY, 30))
             {
-                if (CAST_AI(npc_high_abbot_landgren::npc_high_abbot_landgrenAI, cC->AI())->PlayerGUID == NULL)
+                if (CAST_AI(npc_high_abbot_landgren::npc_high_abbot_landgrenAI, cC->AI())->PlayerGUID == 0)
                     CAST_AI(npc_high_abbot_landgren::npc_high_abbot_landgrenAI, cC->AI())->PlayerGUID = pPlayer->GetGUID();
                 else
                 {

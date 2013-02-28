@@ -915,7 +915,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_exorcism_and_holy_wrath_damage();
     new spell_pal_eye_for_an_eye();
     new spell_pal_guarded_by_the_light();
-    new spell_pal_sacred_shield();
     new spell_pal_hand_of_sacrifice();
     new spell_pal_hand_of_salvation();
     new spell_pal_holy_shock();

@@ -3734,7 +3734,7 @@ void SpellMgr::LoadDbcDataCorrections()
             case SPELLFAMILY_PRIEST:
                 // Twin Disciplines should affect at Prayer of Mending
                 if (spellInfo->SpellIconID == 2292)
-                    spellInfo->EffectSpellClassMask[0] = flag96(0, 622642, 2581594112);
+                    spellInfo->EffectSpellClassMask[EFFECT_0] = flag96(0x00000000, 0x00098032, 0x99E00000);
                 // Spiritual Healing should affect at Prayer of Mending
                 else if (spellInfo->SpellIconID == 46)
                     spellInfo->EffectSpellClassMask[0][1] |= 0x20;
