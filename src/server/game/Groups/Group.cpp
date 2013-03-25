@@ -1354,8 +1354,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                     item->is_looted = true;
                     roll->getLoot()->NotifyItemRemoved(roll->itemSlot);
                     roll->getLoot()->unlootedCount--;
-                    AllowedLooterSet looters = item->GetAllowedLooters();
-                    player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId, looters);
+                    player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId, item->GetAllowedLooters());
                 }
                 else
                 {
@@ -1407,8 +1406,7 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                         item->is_looted = true;
                         roll->getLoot()->NotifyItemRemoved(roll->itemSlot);
                         roll->getLoot()->unlootedCount--;
-                        AllowedLooterSet looters = item->GetAllowedLooters();
-                        player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId, looters);
+                        player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId, item->GetAllowedLooters());
                     }
                     else
                     {
@@ -2144,7 +2142,7 @@ void Group::SetLfgRoles(uint64 guid, const uint8 roles)
         return;
 
     slot->roles = roles;
-         SendUpdate();
+    SendUpdate();
 }
 
 bool Group::IsFull() const
@@ -2192,7 +2190,7 @@ uint32 Group::GetLowGUID() const
     return GUID_LOPART(m_guid);
 }
 
-const char * Group::GetLeaderName() const
+char const* Group::GetLeaderName() const
 {
     return m_leaderName.c_str();
 }
