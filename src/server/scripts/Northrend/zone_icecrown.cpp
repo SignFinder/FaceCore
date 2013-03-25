@@ -32,6 +32,8 @@ EndContentData */
 #include "ScriptedGossip.h"
 #include "SpellAuras.h"
 #include "Player.h"
+#include "TemporarySummon.h"
+#include "CombatAI.h"
 
 /*######
 ## npc_arete
@@ -203,7 +205,9 @@ public:
             if (uiDamage > me->GetHealth() && pDoneBy->GetTypeId() == TYPEID_PLAYER)
             {
                 uiDamage = 0;
-                CAST_PLR(pDoneBy)->KilledMonsterCredit(33708,0);
+
+                if (Player* player = pDoneBy->ToPlayer())
+                player->KilledMonsterCredit(33708,0);
                 me->setFaction(35);
                 me->DespawnOrUnsummon(5000);
                 me->SetHomePosition(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),me->GetOrientation());
@@ -994,6 +998,92 @@ public:
     }
 };
 
+/*######
+## Borrowed Technology - Id: 13291, The Solution Solution (daily) - Id: 13292, Volatility - Id: 13239, Volatiliy - Id: 13261 (daily)
+######*/
+
+enum BorrowedTechnologyAndVolatility
+{
+    // Spells
+    SPELL_GRAB             = 59318,
+    SPELL_PING_BUNNY       = 59375,
+    SPELL_IMMOLATION       = 54690,
+    SPELL_EXPLOSION        = 59335,
+    SPELL_RIDE             = 56687,
+
+    // Points
+    POINT_GRAB_DECOY       = 1,
+    POINT_FLY_AWAY         = 2,
+
+    // Events
+    EVENT_FLY_AWAY         = 1
+};
+
+class npc_frostbrood_skytalon : public CreatureScript
+{
+    public:
+        npc_frostbrood_skytalon() : CreatureScript("npc_frostbrood_skytalon") { }
+
+        struct npc_frostbrood_skytalonAI : public VehicleAI
+        {
+            npc_frostbrood_skytalonAI(Creature* creature) : VehicleAI(creature) { }
+
+            EventMap events;
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                me->GetMotionMaster()->MovePoint(POINT_GRAB_DECOY, summoner->GetPositionX(), summoner->GetPositionY(), summoner->GetPositionZ());
+            }
+
+            void MovementInform(uint32 type, uint32 id)
+            {
+                if (type != POINT_MOTION_TYPE)
+                    return;
+
+                if (id == POINT_GRAB_DECOY)
+                    if (TempSummon* summon = me->ToTempSummon())
+                        if (Unit* summoner = summon->GetSummoner())
+                            DoCast(summoner, SPELL_GRAB); 
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                VehicleAI::UpdateAI(diff);
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    if (eventId == EVENT_FLY_AWAY)
+                    {
+                        Position randomPosOnRadius;
+                        randomPosOnRadius.m_positionZ = (me->GetPositionZ() + 40.0f);
+                        me->GetNearPoint2D(randomPosOnRadius.m_positionX, randomPosOnRadius.m_positionY, 40.0f, me->GetAngle(me));
+                        me->GetMotionMaster()->MovePoint(POINT_FLY_AWAY, randomPosOnRadius);
+                    }
+                }
+            }
+
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+            {
+                switch (spell->Id)
+                {
+                    case SPELL_EXPLOSION:
+                        DoCast(me, SPELL_IMMOLATION);
+                        break;
+                    case SPELL_RIDE:
+                        DoCastAOE(SPELL_PING_BUNNY);
+                        events.ScheduleEvent(EVENT_FLY_AWAY, 100);
+                        break;
+                }
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_frostbrood_skytalonAI(creature);
+        }
+};
+
 void AddSC_icecrown()
 {
     new npc_arete;
@@ -1005,4 +1095,5 @@ void AddSC_icecrown()
     new npc_vereth_the_cunning;
     new npc_tournament_training_dummy;
     new npc_blessed_banner();
+    new npc_frostbrood_skytalon();
 }
