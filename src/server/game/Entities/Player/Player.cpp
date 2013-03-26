@@ -16269,7 +16269,7 @@ void Player::KilledMonsterCredit(uint32 entry, uint64 guid)
     Creature* killed = NULL;
     if (guid)
     {
-        Creature* killed = GetMap()->GetCreature(guid);
+        killed = GetMap()->GetCreature(guid);
         if (killed && killed->GetEntry())
             real_entry = killed->GetEntry();
     }
